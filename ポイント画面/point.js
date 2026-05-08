@@ -1,7 +1,6 @@
 const statusData = {
   level: 'Lv. 1,000,000',
   count: '5/9匹',
-  progress: 55,
   points: 0, // 初期ポイント（ミッション完了時に20ずつ増加）
 };
 
@@ -18,16 +17,41 @@ function updateUI() {
   const progressFill = document.querySelector('.progress-fill');
   const progressBar = document.querySelector('.progress-bar');
   const pointsText = document.querySelector('.points');
+  const levelText = document.querySelector('.level-info span:first-child');
+
+  // 計算：ポイントからレベルと次レベルへの進捗を算出
+  const { level, progressPercent } = computeLevelFromPoints(statusData.points);
+
+  if (levelText) {
+    levelText.textContent = `Lv. ${level}`;
+  }
+
   if (progressFill) {
-    progressFill.style.width = `${statusData.progress}%`;
+    progressFill.style.width = `${progressPercent}%`;
   }
   if (progressBar) {
-    progressBar.setAttribute('aria-valuenow', String(statusData.progress));
+    progressBar.setAttribute('aria-valuenow', String(Math.round(progressPercent)));
   }
   if (pointsText) {
     pointsText.textContent = `ポイント: ${statusData.points}`;
   }
   updateMissionDisplay();
+}
+
+// ポイントから現在レベルと次レベルへの進捗(%)を計算する
+function computeLevelFromPoints(points) {
+  let level = 1;
+  let req = 50; // レベル1から次に上がるための必要ポイント
+  let remaining = points;
+
+  while (remaining >= req) {
+    remaining -= req;
+    level += 1;
+    req += 50; // 次のレベルは前の必要ポイントに+50
+  }
+
+  const progressPercent = req > 0 ? (remaining / req) * 100 : 0;
+  return { level, progressPercent };
 }
 
 // ミッション表示を更新
@@ -76,7 +100,6 @@ function undoMission(idx) {
     if (missions[idx].completed) {
       missions[idx].completed = false;
       statusData.points -= 20;
-      statusData.progress = Math.max(statusData.progress - 5, 0);
       console.log(`ミッション取り消し -20ポイント (合計: ${statusData.points})`);
     }
     updateUI();
@@ -89,21 +112,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const progressBar = document.querySelector('.progress-bar');
   const progressFill = document.querySelector('.progress-fill');
 
-  if (levelText) {
-    levelText.textContent = statusData.level;
-  }
-
-  if (pointsText) {
-    pointsText.textContent = `ポイント: ${statusData.points}`;
-  }
-
-  if (progressBar) {
-    progressBar.setAttribute('aria-valuenow', String(statusData.progress));
-  }
-
-  if (progressFill) {
-    progressFill.style.width = `${statusData.progress}%`;
-  }
+  // 初期 UI をポイント基準で描画
+  updateUI();
 
   // ミッションボタンのクリック挙動
   const missionBtn = document.querySelector('.mission-button');
@@ -134,10 +144,43 @@ window.addEventListener('DOMContentLoaded', () => {
   const featureCards = document.querySelectorAll('.feature-card');
   if (featureCards && featureCards.length) {
     featureCards.forEach((btn, idx) => {
+      const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
+      const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
+
+      // 初期化: 既に今日クリック済みなら見た目と disabled を設定
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        if (localStorage.getItem(key) === today) {
+          btn.classList.add('clicked-today');
+          btn.disabled = true;
+        }
+      } catch (e) {
+        // localStorage が使えない環境ではフォールバックして何もしない
+        console.warn('localStorage unavailable', e);
+      }
+
       btn.addEventListener('click', () => {
-        const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
-        console.log(`${label} がクリックされました`);
-        alert(`${label} を開きます`);
+        // 押下済み/disabledなら処理しない
+        if (btn.disabled || btn.classList.contains('clicked-today')) {
+          alert('このカテゴリは今日既に受け取り済みです。');
+          return;
+        }
+
+        // 10ポイント加算
+        statusData.points += 10;
+        updateUI();
+
+        // 今日としてマークして保存
+        try {
+          localStorage.setItem(key, today);
+        } catch (e) {
+          console.warn('localStorage set failed', e);
+        }
+        btn.classList.add('clicked-today');
+        btn.disabled = true;
+
+        // ユーザーフィードバック
+        console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
       });
     });
   }
@@ -160,7 +203,6 @@ window.addEventListener('DOMContentLoaded', () => {
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
-            statusData.progress = Math.min(statusData.progress + 5, 100);
             console.log(`ミッション完了！ +20ポイント (合計: ${statusData.points})`);
           }
           updateUI();

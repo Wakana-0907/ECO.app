@@ -259,6 +259,13 @@ body {
   cursor: pointer;
 }
 
+.feature-card.clicked-today,
+.feature-card:disabled {
+  opacity: 0.6;
+  transform: none;
+  pointer-events: none;
+}
+
 .feature-icon {
   font-size: 1.4rem;
   line-height: 1;
