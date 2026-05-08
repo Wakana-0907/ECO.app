@@ -25,4 +25,14 @@ window.addEventListener('DOMContentLoaded', () => {
   if (progressFill) {
     progressFill.style.width = `${statusData.progress}%`;
   }
+
+  // ミッションボタンのクリック挙動
+  const missionBtn = document.querySelector('.mission-button');
+  if (missionBtn) {
+    missionBtn.addEventListener('click', () => {
+      // 将来的にモーダルや遷移を入れる場所
+      console.log('ミッションボタンがクリックされました');
+      alert('ミッションを表示します');
+    });
+  }
 });

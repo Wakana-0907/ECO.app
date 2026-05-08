@@ -84,6 +84,38 @@ body {
   transition: width 0.45s ease;
 }
 
+.mission-section {
+  margin-top: 16px;
+  display: flex;
+}
+
+.mission-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+.mission-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.22);
+}
+
+.mission-icon {
+  line-height: 1;
+}
+
 @media (max-width: 380px) {
   body {
     padding: 16px;
