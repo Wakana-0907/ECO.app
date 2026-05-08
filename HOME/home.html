@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <!-- スマホ対応の肝：画面幅をデバイス幅に合わせる -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマホ対応できてる？</title>
-    <link rel="stylesheet" href="home.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スマホ対応できてる？</title>
+  <link rel="stylesheet" href="home.css">
 </head>
-
 <body>
+  <main class="point-screen">
+    <header class="status-card">
+      <div class="level-info">
+        <span>Lv. 1,000,000</span>
+        <span class="count">5/9匹</span>
+      </div>
+      <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
+        <div class="progress-fill" style="width: 55%;"></div>
+      </div>
+    </header>
+  </main>
 
-<script src="HOME/home.js"></script>
-
+  <script src="home.js"></script>
 </body>
 </html>
