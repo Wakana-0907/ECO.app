@@ -4,7 +4,7 @@ const statusData = {
   points: 0,
 };
 
-const dialogMessage = '木を植えたから、森がちょっと元気になったよ！';
+const dialogMessage = '木を◯本植えたのと同じ量のCO₂を削減したよ！';
 
 function updateStatusCard() {
   const levelText = document.querySelector('.level-info span:first-child');
