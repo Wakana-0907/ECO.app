@@ -1,20 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <!-- スマホ対応の肝：画面幅をデバイス幅に合わせる -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマホ対応できてる？</title>
-    <link rel="stylesheet" href="home.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スマホ対応できてる？</title>
+  <link rel="stylesheet" href="home.css">
 </head>
-
 <body>
+  <div class="app-container">
+    <div class="content-wrapper">
+      <div class="page-content page-home active">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">ホーム</h1>
+            <p class="placeholder">ここにホームコンテンツが表示されます</p>
+          </section>
+        </main>
+      </div>
 
-<div style="padding: 30px; margin: 30px; border: 5px solid #333333; border-radius: 10px; background-color: #ffffff;">
-    ここに文字を入力する。
-</div>
+      <div class="page-content page-mission">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">ミッション</h1>
+            <p class="placeholder">進行中のミッションがここに表示されます</p>
+          </section>
+        </main>
+      </div>
 
-<script src="home.js"></script>
+      <div class="page-content page-badge">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">バッジ</h1>
+            <p class="placeholder">獲得したバッジがここに表示されます</p>
+          </section>
+        </main>
+      </div>
 
+      <div class="page-content page-link">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">リンク</h1>
+            <p class="placeholder">外部リンクがここに表示されます</p>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <nav class="tab-navigation" role="tablist">
+      <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
+        <span class="tab-icon">🏠</span>
+        <span class="tab-label">ホーム</span>
+      </button>
+      <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
+        <span class="tab-icon">📃</span>
+        <span class="tab-label">ミッション</span>
+      </button>
+      <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
+        <span class="tab-icon">⭐</span>
+        <span class="tab-label">バッジ</span>
+      </button>
+      <button class="tab-button" data-page="link" role="tab" aria-selected="false">
+        <span class="tab-icon">🔗</span>
+        <span class="tab-label">リンク</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="home.js"></script>
 </body>
 </html>
