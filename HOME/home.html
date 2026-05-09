@@ -7,17 +7,64 @@
   <link rel="stylesheet" href="home.css">
 </head>
 <body>
-  <main class="point-screen">
-    <header class="status-card">
-      <div class="level-info">
-        <span>Lv. 1,000,000</span>
-        <span class="count">5/9匹</span>
+  <div class="app-container">
+    <div class="content-wrapper">
+      <div class="page-content page-home active">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">ホーム</h1>
+            <p class="placeholder">ここにホームコンテンツが表示されます</p>
+          </section>
+        </main>
       </div>
-      <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
-        <div class="progress-fill" style="width: 55%;"></div>
+
+      <div class="page-content page-mission">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">ミッション</h1>
+            <p class="placeholder">進行中のミッションがここに表示されます</p>
+          </section>
+        </main>
       </div>
-    </header>
-  </main>
+
+      <div class="page-content page-badge">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">バッジ</h1>
+            <p class="placeholder">獲得したバッジがここに表示されます</p>
+          </section>
+        </main>
+      </div>
+
+      <div class="page-content page-link">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">リンク</h1>
+            <p class="placeholder">外部リンクがここに表示されます</p>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <nav class="tab-navigation" role="tablist">
+      <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
+        <span class="tab-icon">🏠</span>
+        <span class="tab-label">ホーム</span>
+      </button>
+      <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
+        <span class="tab-icon">📃</span>
+        <span class="tab-label">ミッション</span>
+      </button>
+      <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
+        <span class="tab-icon">⭐</span>
+        <span class="tab-label">バッジ</span>
+      </button>
+      <button class="tab-button" data-page="link" role="tab" aria-selected="false">
+        <span class="tab-icon">🔗</span>
+        <span class="tab-label">リンク</span>
+      </button>
+    </nav>
+  </div>
 
   <script src="home.js"></script>
 </body>

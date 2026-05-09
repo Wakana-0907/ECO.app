@@ -1,8 +1,24 @@
-const statusData = {
-  level: 'Lv. 1,000,000',
-  count: '5/9匹',
-  progress: 55,
-};
+function switchPage(pageName) {
+  const pages = document.querySelectorAll('.page-content');
+  const tabs = document.querySelectorAll('.tab-button');
+
+  pages.forEach(page => {
+    page.classList.remove('active');
+  });
+
+  tabs.forEach(tab => {
+    tab.classList.remove('active');
+    if (tab.getAttribute('data-page') === pageName) {
+      tab.classList.add('active');
+    }
+  });
+
+  const targetPage = document.querySelector(`.page-${pageName}`);
+  if (targetPage) {
+    targetPage.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   const levelText = document.querySelector('.level-info span:first-child');
@@ -25,4 +41,12 @@ window.addEventListener('DOMContentLoaded', () => {
   if (progressFill) {
     progressFill.style.width = `${statusData.progress}%`;
   }
+
+  const tabButtons = document.querySelectorAll('.tab-button');
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const pageName = button.getAttribute('data-page');
+      switchPage(pageName);
+    });
+  });
 });
