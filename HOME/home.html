@@ -47,24 +47,33 @@
         </main>
       </div>
 
-    <nav class="tab-navigation" role="tablist">
-      <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
-        <span class="tab-icon">🏠</span>
-        <span class="tab-label">ホーム</span>
-      </button>
-      <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
-        <span class="tab-icon">📃</span>
-        <span class="tab-label">ミッション</span>
-      </button>
-      <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
-        <span class="tab-icon">⭐</span>
-        <span class="tab-label">バッジ</span>
-      </button>
-      <button class="tab-button" data-page="url" role="tab" aria-selected="false">
-        <span class="tab-icon">🔗</span>
-        <span class="tab-label">リンク</span>
-      </button>
-    </nav>
+      <div class="page-content page-url" data-file="url.html">
+        <main class="point-screen">
+          <section class="content-card">
+            <h1 class="page-title">リンク</h1>
+            <p class="placeholder">外部リンクがここに表示されます</p>
+          </section>
+        </main>
+      </div>
+
+      <nav class="tab-navigation" role="tablist">
+        <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">ホーム</span>
+        </button>
+        <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
+          <span class="tab-icon">📃</span>
+          <span class="tab-label">ミッション</span>
+        </button>
+        <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
+          <span class="tab-icon">⭐</span>
+          <span class="tab-label">バッジ</span>
+        </button>
+        <button class="tab-button" data-page="url" role="tab" aria-selected="false">
+          <span class="tab-icon">🔗</span>
+          <span class="tab-label">リンク</span>
+        </button>
+      </nav>
   </div>
 
   <script src="home.js"></script>

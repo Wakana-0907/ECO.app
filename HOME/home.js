@@ -69,10 +69,10 @@ function switchPage(pageName) {
   });
 
   tabs.forEach(tab => {
-    tab.classList.remove('active');
-    if (tab.getAttribute('data-page') === pageName || tab.getAttribute('data-page') === pageName.replace('.html', '')) {
-      tab.classList.add('active');
-    }
+    const tabPage = tab.getAttribute('data-page');
+    const isActive = tabPage === pageName || tabPage === pageName.replace('.html', '');
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
   });
 
   const targetPage = getPageElement(pageName);
