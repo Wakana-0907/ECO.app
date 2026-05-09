@@ -42,6 +42,24 @@ function typeDialogText(text, target, interval = 35) {
   }, interval);
 }
 
+function getPageElement(pageIdentifier) {
+  const byClass = document.querySelector(`.page-${pageIdentifier}`);
+  if (byClass) {
+    return byClass;
+  }
+
+  const byFile = document.querySelector(`.page-content[data-file="${pageIdentifier}"]`);
+  if (byFile) {
+    return byFile;
+  }
+
+  const pages = document.querySelectorAll('.page-content');
+  return Array.from(pages).find(page => {
+    const placeholder = page.querySelector('.placeholder');
+    return placeholder && placeholder.textContent.trim() === pageIdentifier;
+  }) || null;
+}
+
 function switchPage(pageName) {
   const pages = document.querySelectorAll('.page-content');
   const tabs = document.querySelectorAll('.tab-button');
@@ -52,12 +70,12 @@ function switchPage(pageName) {
 
   tabs.forEach(tab => {
     tab.classList.remove('active');
-    if (tab.getAttribute('data-page') === pageName) {
+    if (tab.getAttribute('data-page') === pageName || tab.getAttribute('data-page') === pageName.replace('.html', '')) {
       tab.classList.add('active');
     }
   });
 
-  const targetPage = document.querySelector(`.page-${pageName}`);
+  const targetPage = getPageElement(pageName);
   if (targetPage) {
     targetPage.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
