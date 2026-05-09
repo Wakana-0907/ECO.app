@@ -74,6 +74,21 @@ body {
   padding: 20px;
 }
 
+.dialog-card {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 24px;
+  padding: 18px 20px;
+  color: #0f172a;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.09);
+}
+
+.dialog-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 .progress-bar {
   position: relative;
   width: 100%;

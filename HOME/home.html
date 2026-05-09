@@ -9,7 +9,7 @@
 <body>
   <div class="app-container">
     <div class="content-wrapper">
-      <div class="page-content page-home active">
+      <div class="page-content page-home active" data-file="home.html">
         <main class="point-screen">
           <div class="cards-grid">
             <section class="status-card">
@@ -21,11 +21,15 @@
                 <div class="progress-fill" style="width: 55%;"></div>
               </div>
             </section>
+
+            <section class="dialog-card">
+              <p class="dialog-text"></p>
+            </section>
           </div>
         </main>
       </div>
 
-      <div class="page-content page-mission">
+      <div class="page-content page-mission" data-file="mission.html">
         <main class="point-screen">
           <section class="content-card">
             <h1 class="page-title">ミッション</h1>
@@ -34,7 +38,7 @@
         </main>
       </div>
 
-      <div class="page-content page-badge">
+      <div class="page-content page-badge" data-file="badge.html">
         <main class="point-screen">
           <section class="content-card">
             <h1 class="page-title">バッジ</h1>
@@ -43,7 +47,7 @@
         </main>
       </div>
 
-      <div class="page-content page-link">
+      <div class="page-content page-url" data-file="url.html">
         <main class="point-screen">
           <section class="content-card">
             <h1 class="page-title">リンク</h1>
@@ -51,26 +55,25 @@
           </section>
         </main>
       </div>
-    </div>
 
-    <nav class="tab-navigation" role="tablist">
-      <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
-        <span class="tab-icon">🏠</span>
-        <span class="tab-label">ホーム</span>
-      </button>
-      <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
-        <span class="tab-icon">📃</span>
-        <span class="tab-label">ミッション</span>
-      </button>
-      <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
-        <span class="tab-icon">⭐</span>
-        <span class="tab-label">バッジ</span>
-      </button>
-      <button class="tab-button" data-page="link" role="tab" aria-selected="false">
-        <span class="tab-icon">🔗</span>
-        <span class="tab-label">リンク</span>
-      </button>
-    </nav>
+      <nav class="tab-navigation" role="tablist">
+        <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">ホーム</span>
+        </button>
+        <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
+          <span class="tab-icon">📃</span>
+          <span class="tab-label">ミッション</span>
+        </button>
+        <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
+          <span class="tab-icon">⭐</span>
+          <span class="tab-label">バッジ</span>
+        </button>
+        <button class="tab-button" data-page="url" role="tab" aria-selected="false">
+          <span class="tab-icon">🔗</span>
+          <span class="tab-label">リンク</span>
+        </button>
+      </nav>
   </div>
 
   <script src="home.js"></script>
