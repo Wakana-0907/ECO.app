@@ -4,6 +4,8 @@ const statusData = {
   points: 0,
 };
 
+const dialogMessage = '木を植えたから、森がちょっと元気になったよ！';
+
 function updateStatusCard() {
   const levelText = document.querySelector('.level-info span:first-child');
   const pointsText = document.querySelector('.points');
@@ -25,6 +27,19 @@ function updateStatusCard() {
   if (progressFill) {
     progressFill.style.width = `${statusData.progress}%`;
   }
+}
+
+function typeDialogText(text, target, interval = 35) {
+  if (!target) return;
+  target.textContent = '';
+  let index = 0;
+  const timer = setInterval(() => {
+    target.textContent += text[index] || '';
+    index += 1;
+    if (index > text.length) {
+      clearInterval(timer);
+    }
+  }, interval);
 }
 
 function switchPage(pageName) {
@@ -51,6 +66,11 @@ function switchPage(pageName) {
 
 window.addEventListener('DOMContentLoaded', () => {
   updateStatusCard();
+
+  const dialogText = document.querySelector('.dialog-text');
+  if (dialogText) {
+    typeDialogText(dialogMessage, dialogText, 32);
+  }
 
   const tabButtons = document.querySelectorAll('.tab-button');
   tabButtons.forEach(button => {
