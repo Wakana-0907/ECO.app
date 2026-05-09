@@ -87,8 +87,6 @@ body {
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.7;
-  letter-spacing: 0.02em;
-  white-space: pre-wrap;
 }
 
 .progress-bar {
