@@ -20,7 +20,7 @@ function updateUI() {
   const levelText = document.querySelector('.level-info span:first-child');
 
   // 計算：ポイントからレベルと次レベルへの進捗を算出
-  const { level, progressPercent } = computeLevelFromPoints(statusData.points);
+  const { level, progressPercent, pointsInLevel, req } = computeLevelFromPoints(statusData.points);
 
   if (levelText) {
     levelText.textContent = `Lv. ${level}`;
@@ -33,7 +33,8 @@ function updateUI() {
     progressBar.setAttribute('aria-valuenow', String(Math.round(progressPercent)));
   }
   if (pointsText) {
-    pointsText.textContent = `ポイント: ${statusData.points}`;
+    // 現在レベル内でのポイント表示（レベルアップで 0 になる）
+    pointsText.textContent = `ポイント: ${pointsInLevel}`;
   }
   updateMissionDisplay();
 }
@@ -51,7 +52,9 @@ function computeLevelFromPoints(points) {
   }
 
   const progressPercent = req > 0 ? (remaining / req) * 100 : 0;
-  return { level, progressPercent };
+  // remaining は「現在のレベルで獲得しているポイント」になる
+  const pointsInLevel = remaining;
+  return { level, progressPercent, pointsInLevel, req };
 }
 
 // ミッション表示を更新
@@ -107,6 +110,30 @@ function undoMission(idx) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = (() => {
+    try {
+      return localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  if (!currentUser) {
+    location.href = '../サインイン・サインアップ画面/signin.html';
+    return;
+  }
+
+  // 現在ログインしているユーザー名を表示（localStorage.users から取得）
+  try {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userObj = users.find(u => u.email === currentUser);
+    const displayName = (userObj && userObj.username) ? userObj.username : currentUser;
+    const userNameEl = document.querySelector('.user-name');
+    if (userNameEl) userNameEl.textContent = displayName;
+  } catch (e) {
+    // ignore
+  }
+
   const levelText = document.querySelector('.level-info span:first-child');
   const pointsText = document.querySelector('.points');
   const progressBar = document.querySelector('.progress-bar');

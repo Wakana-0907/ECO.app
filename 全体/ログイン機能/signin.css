@@ -27,25 +27,6 @@ body {
   padding: 16px;
 }
 
-.screen-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 12px;
-}
-
-.logout-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: #eef2ff;
-  color: #4338ca;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
 .status-card {
   background: #ffffff;
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -315,3 +296,18 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* --- sign-in specific styles --- */
+.auth-screen{width:min(100%,420px);margin:0 auto}
+.auth-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 12px 30px rgba(2,6,23,.06);border:1px solid rgba(148,163,184,0.08)}
+.auth-title{font-size:1.25rem;margin:0 0 14px;color:#0f172a}
+.field{margin-bottom:12px}
+.field .label{display:block;font-size:0.85rem;margin-bottom:6px;color:#374151}
+.field input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);font-size:1rem}
+.form-row{display:flex;align-items:center;justify-content:space-between}
+.remember{font-size:0.9rem;color:#475569}
+.btn-primary{width:100%;padding:12px 14px;background:linear-gradient(90deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.signin-msg{margin-top:12px;font-size:0.95rem;color:#065f46}
+
+.auth-footer{margin-top:12px;text-align:center}
+.auth-footer a{color:#3b82f6;text-decoration:none;font-weight:700}

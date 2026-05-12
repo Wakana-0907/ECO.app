@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サインアップ</title>
+  <link rel="stylesheet" href="signin.css">
+</head>
+<body>
+  <main class="auth-screen">
+    <div class="auth-card">
+      <h1 class="auth-title">アカウント作成</h1>
+
+      <form id="signup-form" novalidate>
+        <label class="field">
+          <span class="label">ユーザー名</span>
+          <input type="text" name="name" required placeholder="山田 太郎">
+        </label>
+
+        <label class="field">
+          <span class="label">メールアドレス</span>
+          <input type="email" name="email" required placeholder="you@example.com">
+        </label>
+
+        <label class="field">
+          <span class="label">パスワード</span>
+          <input type="password" name="password" required minlength="6" placeholder="6文字以上">
+        </label>
+
+        <button type="submit" class="btn-primary">アカウントを作成</button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="signin.html">既にアカウントをお持ちの方はこちら</a>
+      </div>
+
+      <div id="signup-msg" class="signin-msg" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <script src="signup.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>サインイン</title>
+	<link rel="stylesheet" href="signin.css">
+</head>
+<body>
+	<main class="auth-screen">
+		<div class="auth-card">
+			<h1 class="auth-title">サインイン</h1>
+
+			<form id="signin-form" novalidate>
+				<label class="field">
+					<span class="label">メールアドレス</span>
+					<input type="email" name="email" required autocomplete="username" placeholder="you@example.com">
+				</label>
+
+				<label class="field">
+					<span class="label">パスワード</span>
+					<input type="password" name="password" required autocomplete="current-password" minlength="6" placeholder="6文字以上">
+				</label>
+
+				<div class="form-row">
+					<label class="remember"><input type="checkbox" name="remember"> ログイン状態を保持</label>
+				</div>
+
+				<button type="submit" class="btn-primary">サインイン</button>
+			</form>
+
+			<div class="auth-footer">
+				<a href="signup.html">アカウントを作成する</a>
+			</div>
+
+			<div id="signin-msg" class="signin-msg" aria-live="polite"></div>
+		</div>
+	</main>
+
+	<script src="signin.js"></script>
+</body>
+</html>
