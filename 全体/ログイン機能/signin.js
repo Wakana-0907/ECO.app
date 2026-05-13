@@ -55,16 +55,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
 	try{
 		const remembered = localStorage.getItem('currentUser');
 		if(remembered){
-			// 保存されている email からユーザー名を探して表示
-			try{
-				const users = loadUsers();
-				const u = users.find(x => x.email === remembered);
-				const name = (u && u.username) ? u.username : remembered;
-				msg.textContent = `ようこそ ${name} さん。自動ログイン中...`;
-			} catch(e){
-				msg.textContent = `ようこそ ${remembered} さん。自動ログイン中...`;
-			}
-			setTimeout(()=> location.href = '../ポイント画面/point.html', 900);
+			msg.textContent = `ようこそ ${remembered} さん。自動ログイン中...`;
+			setTimeout(()=> location.href = '../../ポイント画面/point.html', 900);
 			return;
 		}
 	} catch(e){ /* ignore */ }
@@ -74,31 +66,32 @@ window.addEventListener('DOMContentLoaded', ()=>{
 		msg.textContent = '';
 
 		const fd = new FormData(form);
-		const email = (fd.get('email') || '').toString().trim().toLowerCase();
+		const identifier = (fd.get('identifier') || '').toString().trim();
 		const password = (fd.get('password') || '').toString();
 		const remember = !!fd.get('remember');
 
-		if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-			msg.textContent = '有効なメールアドレスを入力してください';
+		if(!identifier){
+			msg.textContent = 'ユーザー名またはメールアドレスを入力してください';
 			return;
 		}
 		if(!password){ msg.textContent = 'パスワードを入力してください'; return; }
 
 		const users = loadUsers();
-		const user = users.find(u => u.email === email);
-		if(!user){ msg.textContent = 'メールアドレスまたはパスワードが違います'; return; }
+		const isEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(identifier.toLowerCase());
+		const user = isEmail
+			? users.find(u => u.email === identifier.toLowerCase())
+			: users.find(u => u.username === identifier);
+		if(!user){ msg.textContent = 'ユーザー名またはパスワードが違います'; return; }
 
 		try{
 			const saltBuf = base64ToArrayBuffer(user.salt);
 			const derived = await deriveKey(password, saltBuf);
 			const hashB64 = arrayBufferToBase64(derived.buffer);
-			if(hashB64 !== user.hash){ msg.textContent = 'メールアドレスまたはパスワードが違います'; return; }
+			if(hashB64 !== user.hash){ msg.textContent = 'ユーザー名またはパスワードが違います'; return; }
 
-			setCurrentUser(email, remember);
-			// ユーザー名があればそれを表示
-			const displayName = user.username || email;
-			msg.textContent = `ようこそ ${displayName} さん。ログインしました。画面を移動します…`;
-			setTimeout(()=> location.href = '../ポイント画面/point.html', 700);
+			setCurrentUser(user.email, remember);
+			msg.textContent = 'ログインしました。画面を移動します…';
+			setTimeout(()=> location.href = '../../ポイント画面/point.html', 700);
 		} catch(err){
 			console.error(err);
 			msg.textContent = 'ログイン中にエラーが発生しました';

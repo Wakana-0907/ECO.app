@@ -119,20 +119,15 @@ window.addEventListener('DOMContentLoaded', () => {
   })();
 
   if (!currentUser) {
-    location.href = '../サインイン・サインアップ画面/signin.html';
+    location.href = '../全体/ログイン機能/signin.html';
     return;
   }
 
-  // 現在ログインしているユーザー名を表示（localStorage.users から取得）
-  try {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userObj = users.find(u => u.email === currentUser);
-    const displayName = (userObj && userObj.username) ? userObj.username : currentUser;
-    const userNameEl = document.querySelector('.user-name');
-    if (userNameEl) userNameEl.textContent = displayName;
-  } catch (e) {
-    // ignore
+  if (window.UsernameDisplay) {
+    window.UsernameDisplay.renderAll();
   }
+
+  
 
   const levelText = document.querySelector('.level-info span:first-child');
   const pointsText = document.querySelector('.points');

@@ -39,11 +39,11 @@ window.addEventListener('DOMContentLoaded', ()=>{
     msg.textContent = '';
 
     const fd = new FormData(form);
-    const name = (fd.get('name') || '').toString().trim();
+    const username = (fd.get('username') || '').toString().trim();
     const email = (fd.get('email') || '').toString().trim().toLowerCase();
     const password = (fd.get('password') || '').toString();
 
-    if(!name){ msg.textContent = 'ユーザー名を入力してください'; return; }
+    if(!username){ msg.textContent = 'ユーザー名を入力してください'; return; }
     if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.textContent = '有効なメールアドレスを入力してください'; return; }
     if(!password || password.length < 6){ msg.textContent = 'パスワードは6文字以上にしてください'; return; }
 
@@ -56,7 +56,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       const saltB64 = arrayBufferToBase64(salt.buffer);
       const hashB64 = arrayBufferToBase64(derived.buffer);
 
-      users.push({ username: name, email, salt: saltB64, hash: hashB64 });
+      users.push({ username, email, salt: saltB64, hash: hashB64 });
       localStorage.setItem('users', JSON.stringify(users));
 
       msg.textContent = 'アカウントを作成しました。サインイン画面に移動します…';

@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ログアウト</title>
+  <link rel="stylesheet" href="../ユーザー名/ユーザー.css">
   <link rel="stylesheet" href="ログアウト.css">
 </head>
 <body>
-  <div class="screen-header">
-    <span class="user-name"></span>
-  </div>
   <main class="auth-screen">
+    <div class="screen-header">
+      <span class="username-chip" data-username-display></span>
+    </div>
     <div class="auth-card logout-card">
       <h1 class="auth-title">ログアウト完了</h1>
       <p class="logout-message">1.2秒後にサインイン画面へ自動で移動します。</p>
@@ -20,6 +21,7 @@
       </div>
     </div>
   </main>
+  <script src="../ユーザー名/ユーザー.js"></script>
   <script src="logout.js"></script>
 </body>
 </html>
