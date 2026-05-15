@@ -1,35 +1,32 @@
-// モーダル要素を取得
-const modal = document.getElementById('badge-modal');
-const closeBtn = document.querySelector('.close-btn');
-const modalTitle = document.getElementById('modal-title');
-const modalDescription = document.getElementById('modal-description');
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('badge-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-description');
+    const closeBtn = document.querySelector('.close-btn');
+    const badgeItems = document.querySelectorAll('.badge-item');
 
-// すべてのバッジアイテムを取得
-const badgeItems = document.querySelectorAll('.badge-item');
+    // バッジをクリックした時の処理
+    badgeItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const name = item.getAttribute('data-name');
+            const description = item.getAttribute('data-description');
 
-// 各バッジにクリックイベントリスナーを追加
-badgeItems.forEach(badge => {
-    badge.addEventListener('click', () => {
-        const name = badge.getAttribute('data-name');
-        const description = badge.getAttribute('data-description');
-        
-        // モーダルの内容を設定
-        modalTitle.innerText = name;
-        modalDescription.innerText = description;
-        
-        // モーダルを表示
-        modal.style.display = 'block';
+            modalTitle.textContent = name;
+            modalDesc.textContent = description;
+
+            modal.style.display = 'block'; // モーダルを表示
+        });
     });
-});
 
-// 閉じるボタンをクリック時にモーダルを閉じる
-closeBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-});
-
-// モーダルの外をクリック時にモーダルを閉じる
-window.addEventListener('click', (event) => {
-    if (event.target === modal) {
+    // 閉じるボタンをクリックした時
+    closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
-    }
+    });
+
+    // モーダルの外側をクリックした時も閉じる
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 });

@@ -54,14 +54,6 @@ body {
   gap: 16px;
 }
 
-.badge-card {
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 20px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
-  padding: 20px;
-}
-
 /* =========================
    タイトル
 ========================= */
@@ -69,6 +61,7 @@ h1 {
     color: #333;
     margin-bottom: 20px;
     margin-top: 0;
+    text-align: center;
 }
 
 /* =========================
@@ -79,6 +72,8 @@ h1 {
     grid-template-columns: repeat(4, 1fr);
     justify-items: center;
     gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* =========================
@@ -88,7 +83,6 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-
     text-align: center;
 }
 
@@ -109,6 +103,7 @@ h1 {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
     transition: 0.3s;
+    pointer-events: none;
 }
 
 /* =========================
@@ -166,36 +161,33 @@ p {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
+/* モーダルの中身（白枠の部分）にアニメーションを追加 */
 .modal-content {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: #ffffff;
-    margin: 10% auto;
     padding: 30px;
     border-radius: 10px;
     width: 80%;
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    animation: slideDown 0.3s ease-in-out;
+    
+    /* ↓ ここを追加 */
+    animation: slideDown 0.4s ease-out; 
 }
 
+/* もともとある定義を再確認（そのままでOK） */
 @keyframes slideDown {
     from {
-        transform: translateY(-50px);
+        transform: translate(-50%, -50px); /* X軸の固定も忘れずに */
         opacity: 0;
     }
     to {
-        transform: translateY(0);
+        transform: translate(-50%, 0);
         opacity: 1;
     }
 }
@@ -226,4 +218,11 @@ p {
     line-height: 1.6;
     margin: 0;
     font-weight: normal;
+}
+/* Hide any injected/leftover global username or logout UI when this page is embedded */
+.username-chip,
+.logout-link,
+.screen-header .username-chip,
+.screen-header .logout-link {
+    display: none !important;
 }
