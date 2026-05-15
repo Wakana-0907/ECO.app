@@ -23,6 +23,8 @@ function loadUsers(){
 window.addEventListener('DOMContentLoaded', ()=>{
   const form = document.getElementById('signup-form');
   const msg = document.getElementById('signup-msg');
+  const btn = document.getElementById('to-signin');
+  const signinUrl = 'signin.html';
 
   // Web Crypto API が使えない場合は早期に警告してフォームを無効化
   const isCryptoAvailable = (window.crypto && crypto.subtle);
@@ -33,6 +35,21 @@ window.addEventListener('DOMContentLoaded', ()=>{
   }
 
   if(!form) return;
+
+  if (window.UsernameDisplay) {
+    try { window.UsernameDisplay.renderAll(); } catch(e){}
+  }
+
+  const goToSignin = ()=>{
+    try{ localStorage.removeItem('currentUser'); } catch(e){}
+    try{ sessionStorage.removeItem('currentUser'); } catch(e){}
+
+    const target = encodeURI(signinUrl);
+    try { window.location.replace(target); }
+    catch (e) { try { window.location.href = target; } catch (e2) { console.error('redirect failed', e2); } }
+  };
+
+  if (btn) btn.addEventListener('click', goToSignin);
 
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
@@ -60,7 +77,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       localStorage.setItem('users', JSON.stringify(users));
 
       msg.textContent = 'アカウントを作成しました。サインイン画面に移動します…';
-      setTimeout(()=> location.href = 'signin.html', 900);
+      setTimeout(goToSignin, 900);
     } catch(err){
       console.error(err);
       msg.textContent = '登録中にエラーが発生しました';

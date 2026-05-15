@@ -11,7 +11,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
   try{ sessionStorage.removeItem('currentUser'); } catch(e){}
 
   const goToSignin = ()=>{
-    location.href = signinUrl;
+    try{ localStorage.removeItem('currentUser'); } catch(e){}
+    try{ sessionStorage.removeItem('currentUser'); } catch(e){}
+
+    const target = encodeURI(signinUrl);
+    try {
+      // まず履歴を残さず移動（戻るでログアウト前に戻らないように）
+      window.location.replace(target);
+    } catch (e) {
+      try { window.location.href = target; } catch (e2) { console.error('redirect failed', e2); }
+    }
   };
 
   if (btn) {
