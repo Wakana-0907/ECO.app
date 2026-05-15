@@ -1,5 +1,5 @@
 const statusData = {
-  level: 'Lv. 1,000,000',
+  level: 'Lv. 1',
   progress: 55,
   points: 0,
 };
@@ -28,6 +28,45 @@ function updateStatusCard() {
     progressFill.style.width = `${statusData.progress}%`;
   }
 }
+
+function syncFromStorage() {
+  try {
+    const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    const key = currentUser ? `ECO_status_${currentUser}` : 'ECO_status';
+    const raw = localStorage.getItem(key) || localStorage.getItem('ECO_status');
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.points === 'number') statusData.points = parsed.points;
+    if (typeof parsed.level !== 'undefined') statusData.level = parsed.level ? `Lv. ${parsed.level}` : statusData.level;
+    if (typeof parsed.progressPercent === 'number') statusData.progress = Math.round(parsed.progressPercent);
+    updateStatusCard();
+    return true;
+  } catch (e) {
+    console.warn('syncFromStorage failed', e);
+    return false;
+  }
+}
+
+// Listen for storage changes from other frames (e.g. ミッション iframe)
+window.addEventListener('storage', (e) => {
+  if (!e.key) return;
+  if (e.key.indexOf('ECO_status') !== -1) syncFromStorage();
+});
+
+// 受信メッセージで即時同期（iframe からの通知を想定）
+window.addEventListener('message', (e) => {
+  try {
+    const msg = e.data;
+    if (!msg || msg.type !== 'ECO_status_update') return;
+    const p = msg.payload || {};
+    if (typeof p.points === 'number') statusData.points = p.points;
+    if (typeof p.level !== 'undefined') statusData.level = p.level ? `Lv. ${p.level}` : statusData.level;
+    if (typeof p.progressPercent === 'number') statusData.progress = Math.round(p.progressPercent);
+    updateStatusCard();
+  } catch (err) {
+    console.warn('message handler failed', err);
+  }
+});
 
 function typeDialogText(text, target, interval = 35) {
   if (!target) return;
@@ -110,6 +149,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const missionCaret = missionButton.querySelector('.mission-caret');
 
     missionButton.addEventListener('click', () => {
+  // 初回ロード時にストレージの状態を反映
+  syncFromStorage();
       const expanded = missionButton.getAttribute('aria-expanded') === 'true';
       missionButton.setAttribute('aria-expanded', String(!expanded));
 

@@ -11,13 +11,17 @@
     <div class="content-wrapper">
       <div class="page-content page-home active" data-file="home.html">
         <main class="point-screen">
+          <div class="screen-header">
+            <span class="username-chip" data-username-display></span>
+            <a class="logout-link" href="../全体/ログアウト画面/logout.html">ログアウト</a>
+          </div>
           <div class="cards-grid">
             <section class="status-card">
               <div class="level-info">
-                <span>Lv. 1,000,000</span>
+                <span>Lv. 1</span>
                 <span class="points">ポイント: 0</span>
               </div>
-              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
+              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" ariavaluenow="55">
                 <div class="progress-fill" style="width: 55%;"></div>
               </div>
             </section>
@@ -61,6 +65,7 @@
       </nav>
   </div>
 
+  <script src="../全体/ユーザー名/ユーザー.js"></script>
   <script src="home.js"></script>
 </body>
 </html>
