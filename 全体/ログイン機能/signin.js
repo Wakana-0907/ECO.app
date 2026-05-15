@@ -56,7 +56,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 		const remembered = localStorage.getItem('currentUser');
 		if(remembered){
 			msg.textContent = `ようこそ ${remembered} さん。自動ログイン中...`;
-			setTimeout(()=> location.href = '../../ポイント画面/point.html', 900);
+			setTimeout(()=> location.href = '../../HOME/home.html', 900);
 			return;
 		}
 	} catch(e){ /* ignore */ }
@@ -91,7 +91,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 			setCurrentUser(user.email, remember);
 			msg.textContent = 'ログインしました。画面を移動します…';
-			setTimeout(()=> location.href = '../../ポイント画面/point.html', 700);
+			setTimeout(()=> location.href = '../../HOME/home.html', 700);
 		} catch(err){
 			console.error(err);
 			msg.textContent = 'ログイン中にエラーが発生しました';

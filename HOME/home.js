@@ -83,6 +83,12 @@ function switchPage(pageName) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+  if (!currentUser) {
+    location.href = '../全体/ログイン機能/signin.html';
+    return;
+  }
+
   updateStatusCard();
 
   const dialogText = document.querySelector('.dialog-text');
@@ -97,4 +103,29 @@ window.addEventListener('DOMContentLoaded', () => {
       switchPage(pageName);
     });
   });
+
+  const missionButton = document.querySelector('.mission-button');
+  if (missionButton) {
+    const missionContent = document.querySelector('.mission-content');
+    const missionCaret = missionButton.querySelector('.mission-caret');
+
+    missionButton.addEventListener('click', () => {
+      const expanded = missionButton.getAttribute('aria-expanded') === 'true';
+      missionButton.setAttribute('aria-expanded', String(!expanded));
+
+      if (missionContent) {
+        if (expanded) {
+          missionContent.classList.remove('open');
+          setTimeout(() => missionContent.setAttribute('hidden', ''), 200);
+        } else {
+          missionContent.removeAttribute('hidden');
+          requestAnimationFrame(() => missionContent.classList.add('open'));
+        }
+      }
+
+      if (missionCaret) {
+        missionCaret.style.transform = expanded ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+    });
+  }
 });

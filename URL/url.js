@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+  if (!currentUser) {
+    location.href = '../全体/ログイン機能/signin.html';
+    return;
+  }
+
   const page = document.querySelector('.page-url');
   if (!page) return;
 
