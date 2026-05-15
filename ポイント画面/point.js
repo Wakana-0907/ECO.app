@@ -7,9 +7,9 @@ const statusData = {
 // ミッションデータ
 const missions = [
   { id: 0, title: 'ラベル・キャップを剥がす', current: 0, max: 1, completed: false },
-  { id: 1, title: 'ゴミを持ち帰る', current: 2, max: 5, completed: false },
+  { id: 1, title: 'ゴミを持ち帰る', current: 0, max: 5, completed: false },
   { id: 2, title: 'マイバッグを使う', current: 0, max: 1, completed: false },
-  { id: 3, title: 'マイボトル持参', current: 1, max: 3, completed: false },
+  { id: 3, title: 'マイボトル持参', current: 0, max: 3, completed: false },
 ];
 
 // UI更新関数
@@ -37,6 +37,29 @@ function updateUI() {
     pointsText.textContent = `ポイント: ${pointsInLevel}`;
   }
   updateMissionDisplay();
+  // 同期: 現在のポイント/レベルを localStorage に保存してホーム等と共有
+    try {
+    const key = (typeof storageKey === 'function') ? storageKey('ECO_status') : 'ECO_status';
+    const payload = {
+      level,
+      progressPercent,
+      points: statusData.points,
+      pointsInLevel,
+    };
+    localStorage.setItem(key, JSON.stringify(payload));
+    // ミッション進捗も保存
+    try { localStorage.setItem(key.replace('ECO_status', 'ECO_missions'), JSON.stringify(missions)); } catch(e){}
+    // 親フレームへ即時通知（iframe -> parent）
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'ECO_status_update', payload }, '*');
+      }
+    } catch (e) {
+      console.warn('postMessage failed', e);
+    }
+  } catch (e) {
+    console.warn('localStorage set failed', e);
+  }
 }
 
 // ポイントから現在レベルと次レベルへの進捗(%)を計算する
@@ -105,6 +128,19 @@ function undoMission(idx) {
       statusData.points -= 20;
       console.log(`ミッション取り消し -20ポイント (合計: ${statusData.points})`);
     }
+    // 取り消したらその日のクリックロックを解除して再度押せるようにする
+      try {
+        // 現在のログインユーザーに紐づくキーと従来キーの両方を削除
+        const currentUser = (() => {
+          try { return localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'); } catch (e) { return null; }
+        })();
+        const namespaced = currentUser ? `mission_clicked_${missions[idx].id}_${currentUser}` : null;
+        const legacy = `mission_clicked_${missions[idx].id}`;
+        if (namespaced) localStorage.removeItem(namespaced);
+        localStorage.removeItem(legacy);
+      } catch (e) {
+        console.warn('localStorage remove failed', e);
+      }
     updateUI();
   }
 }
@@ -125,6 +161,66 @@ window.addEventListener('DOMContentLoaded', () => {
 
   if (window.UsernameDisplay) {
     window.UsernameDisplay.renderAll();
+  }
+
+  // ストレージキー作成 helper（ユーザー毎にデータを分離）
+  const storageKey = (base) => currentUser ? `${base}_${currentUser}` : base;
+
+  // 以前のセッションがあればミッション進捗を復元
+  try {
+    const saved = localStorage.getItem(storageKey('ECO_missions')) || localStorage.getItem('ECO_missions');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // 上書き（既定の missions 構造を維持しつつ current/max/completed を復元）
+        parsed.forEach((s) => {
+          const idx = missions.findIndex(m => m.id === s.id);
+          if (idx !== -1) {
+            missions[idx].current = typeof s.current === 'number' ? s.current : missions[idx].current;
+            missions[idx].completed = !!s.completed;
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('restore missions failed', e);
+  }
+
+  // 以前のセッションがあればポイント等の状態を復元
+  try {
+    const key = storageKey ? storageKey('ECO_status') : 'ECO_status';
+    const raw = localStorage.getItem(key) || localStorage.getItem('ECO_status');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.points === 'number') {
+        statusData.points = parsed.points;
+      }
+    }
+  } catch (e) {
+    console.warn('restore ECO_status failed', e);
+  }
+
+  // --- 一時リセット: 今回だけカテゴリの「今日フラグ」を消して押せるようにする ---
+  try {
+    if (!sessionStorage.getItem('feature_reset_done')) {
+      const today = new Date().toISOString().slice(0, 10);
+      document.querySelectorAll('.feature-card').forEach((el) => {
+        const label = el.querySelector('.feature-label')?.textContent || '';
+        const base = `feature_clicked_${label.replace(/\s+/g, '_')}`;
+        const namespaced = storageKey ? storageKey(base) : base;
+        const legacy = base;
+        try {
+          if (localStorage.getItem(namespaced) === today) localStorage.removeItem(namespaced);
+        } catch (e) {}
+        try {
+          if (localStorage.getItem(legacy) === today) localStorage.removeItem(legacy);
+        } catch (e) {}
+        el.classList.remove('clicked-today');
+      });
+      sessionStorage.setItem('feature_reset_done', '1');
+    }
+  } catch (e) {
+    console.warn('feature reset failed', e);
   }
 
   
@@ -167,24 +263,70 @@ window.addEventListener('DOMContentLoaded', () => {
   if (featureCards && featureCards.length) {
     featureCards.forEach((btn, idx) => {
       const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
-      const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
+      const key = storageKey ? storageKey(`feature_clicked_${label.replace(/\s+/g, '_')}`) : `feature_clicked_${label.replace(/\s+/g, '_')}`;
 
       // 初期化: 既に今日クリック済みなら見た目と disabled を設定
       const today = new Date().toISOString().slice(0, 10);
       try {
         if (localStorage.getItem(key) === today) {
           btn.classList.add('clicked-today');
-          btn.disabled = true;
         }
       } catch (e) {
-        // localStorage が使えない環境ではフォールバックして何もしない
         console.warn('localStorage unavailable', e);
       }
 
+      // 特有の取り消しボタンを作るユーティリティ
+      const createFeatureUndo = (el, storKey, labelText) => {
+        // 既にコントロールがあれば返す
+        if (el.querySelector('.feature-controls')) return;
+        const controls = document.createElement('div');
+        controls.className = 'feature-controls';
+        const undoBtn = document.createElement('button');
+        undoBtn.type = 'button';
+        undoBtn.className = 'feature-undo-btn';
+        undoBtn.textContent = '取り消す';
+        undoBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          // ポイントを戻す
+          statusData.points = Math.max(0, statusData.points - 10);
+          // localStorage のキーを総当たりで削除
+          try {
+            const baseKey = storKey.replace(/_\d{4}-\d{2}-\d{2}$/, '');
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (!k) continue;
+              if (k === baseKey || k.startsWith(baseKey + '_') || k.indexOf(baseKey) === 0) {
+                keysToRemove.push(k);
+              }
+            }
+            keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
+          } catch (e) { console.warn('localStorage remove failed', e); }
+          el.classList.remove('clicked-today');
+          controls.remove();
+          updateUI();
+          console.log(`${labelText} の取り消し -10ポイント (合計: ${statusData.points})`);
+        });
+        controls.appendChild(undoBtn);
+        // 見た目: ラベルの直下に配置する（可能ならラベル要素の直後）
+        const labelElForInsert = el.querySelector('.feature-label');
+        if (labelElForInsert && labelElForInsert.parentNode) {
+          labelElForInsert.insertAdjacentElement('afterend', controls);
+        } else {
+          controls.style.marginTop = '8px';
+          el.appendChild(controls);
+        }
+      };
+
+      // 初期化時に既に今日クリック済みであれば取り消しボタンを表示する
+      if (btn.classList.contains('clicked-today')) {
+        try { createFeatureUndo(btn, key, label); } catch (e) { console.warn('createFeatureUndo init failed', e); }
+      }
+
+      // 通常のクリック処理（既にクリック済みなら再クリックは拒否、代わりに取り消しボタンを表示）
       btn.addEventListener('click', () => {
-        // 押下済み/disabledなら処理しない
-        if (btn.disabled || btn.classList.contains('clicked-today')) {
-          alert('このカテゴリは今日既に受け取り済みです。');
+        if (btn.classList.contains('clicked-today')) {
+          alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
           return;
         }
 
@@ -193,15 +335,11 @@ window.addEventListener('DOMContentLoaded', () => {
         updateUI();
 
         // 今日としてマークして保存
-        try {
-          localStorage.setItem(key, today);
-        } catch (e) {
-          console.warn('localStorage set failed', e);
-        }
+        try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
         btn.classList.add('clicked-today');
-        btn.disabled = true;
+        // 取り消しボタンを表示
+        createFeatureUndo(btn, key, label);
 
-        // ユーザーフィードバック
         console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
       });
     });
@@ -215,17 +353,34 @@ window.addEventListener('DOMContentLoaded', () => {
       item.addEventListener('click', (e) => {
         // 取り消しボタンのクリックは除外
         if (e.target.closest('.mission-undo-btn')) return;
-        
+
         const mission = missions[idx];
+        const key = storageKey ? storageKey(`mission_clicked_${mission.id}`) : `mission_clicked_${mission.id}`;
+        const today = new Date().toISOString().slice(0, 10);
+
+        // 日次クリック制限: 同じ日なら押せない
+        try {
+          if (localStorage.getItem(key) === today) {
+            alert('このミッションは今日既に進めました。');
+            return;
+          }
+        } catch (e) {
+          console.warn('localStorage get failed', e);
+        }
+
         if (mission.current < mission.max) {
           mission.current += 1;
           console.log(`${mission.title}: ${mission.current}/${mission.max}`);
-          
+
+          // 日次ロックをセット
+          try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
+
           // 完了時にポイント加算
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
             console.log(`ミッション完了！ +20ポイント (合計: ${statusData.points})`);
+            try { if (typeof saveState === 'function') saveState(); } catch(e){}
           }
           updateUI();
         }
