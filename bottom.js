@@ -1,31 +1,35 @@
-// HTMLの要素を取得
-const badgeImg = document.getElementById('main-badge');
-const recycleBtn = document.getElementById('recycle-btn');
-const countDisplay = document.getElementById('count-display');
-const message = document.getElementById('message');
+// モーダル要素を取得
+const modal = document.getElementById('badge-modal');
+const closeBtn = document.querySelector('.close-btn');
+const modalTitle = document.getElementById('modal-title');
+const modalDescription = document.getElementById('modal-description');
 
-let count = 0;
+// すべてのバッジアイテムを取得
+const badgeItems = document.querySelectorAll('.badge-item');
 
-// ボタンをクリックした時の処理
-recycleBtn.addEventListener('click', () => {
-    count++;
-    countDisplay.innerText = count;
-
-    // バッジ切り替えロジック
-    updateBadge(count);
+// 各バッジにクリックイベントリスナーを追加
+badgeItems.forEach(badge => {
+    badge.addEventListener('click', () => {
+        const name = badge.getAttribute('data-name');
+        const description = badge.getAttribute('data-description');
+        
+        // モーダルの内容を設定
+        modalTitle.innerText = name;
+        modalDescription.innerText = description;
+        
+        // モーダルを表示
+        modal.style.display = 'block';
+    });
 });
 
-function updateBadge(currentCount) {
-    if (currentCount >= 10) {
-        // 10回以上：次のレベルの画像（例：growth.png）
-        // ※まだ画像がない場合は、別のファイル名に変更してください
-        badgeImg.src = 'growth.png'; 
-        badgeImg.classList.add('unlocked');
-        message.innerText = "すごい！木が成長したよ！";
-        
-    } else if (currentCount >= 1) {
-        // 1回以上：始まりのバッジ
-        badgeImg.src = 'hajimari.png';
-        message.innerText = "その調子！あと" + (10 - currentCount) + "回でレベルアップ！";
+// 閉じるボタンをクリック時にモーダルを閉じる
+closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+});
+
+// モーダルの外をクリック時にモーダルを閉じる
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
-}
+});
