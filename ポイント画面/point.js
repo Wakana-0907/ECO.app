@@ -1,6 +1,6 @@
 const statusData = {
-  level: 'Lv. 1,000,000',
-  count: '5/9匹',
+  level: 'Lv. 1',
+  count: '0/50', // 例: "20/50" の形式で表示（現在ポイント/次レベルまでの必要ポイント）
   points: 0, // 初期ポイント（ミッション完了時に20ずつ増加）
 };
 
@@ -212,29 +212,6 @@ window.addEventListener('DOMContentLoaded', () => {
     console.warn('restore ECO_status failed', e);
   }
 
-  // --- 一時リセット: 今回だけカテゴリの「今日フラグ」を消して押せるようにする ---
-  try {
-    if (!sessionStorage.getItem('feature_reset_done')) {
-      const today = new Date().toISOString().slice(0, 10);
-      document.querySelectorAll('.feature-card').forEach((el) => {
-        const label = el.querySelector('.feature-label')?.textContent || '';
-        const base = `feature_clicked_${label.replace(/\s+/g, '_')}`;
-        const namespaced = storageKey ? storageKey(base) : base;
-        const legacy = base;
-        try {
-          if (localStorage.getItem(namespaced) === today) localStorage.removeItem(namespaced);
-        } catch (e) {}
-        try {
-          if (localStorage.getItem(legacy) === today) localStorage.removeItem(legacy);
-        } catch (e) {}
-        el.classList.remove('clicked-today');
-      });
-      sessionStorage.setItem('feature_reset_done', '1');
-    }
-  } catch (e) {
-    console.warn('feature reset failed', e);
-  }
-
   
 
   const levelText = document.querySelector('.level-info span:first-child');
@@ -267,15 +244,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
   const featureCards = document.querySelectorAll('.feature-card');
   if (featureCards && featureCards.length) {
     featureCards.forEach((btn, idx) => {
       const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
       const key = storageKey ? storageKey(`feature_clicked_${label.replace(/\s+/g, '_')}`) : `feature_clicked_${label.replace(/\s+/g, '_')}`;
 
-      const today = new Date().toISOString().slice(0, 10);
+
       try {
-        if (localStorage.getItem(key) === today) {
+        if (localStorage.getItem(key) === getLocalDateKey()) {
           btn.classList.add('clicked-today');
         }
       } catch (e) {
@@ -332,7 +310,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // 通常のクリック処理（既にクリック済みなら再クリックは拒否、代わりに取り消しボタンを表示）
       btn.addEventListener('click', () => {
-        if (btn.disabled || btn.classList.contains('clicked-today')) {
+
           alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
           return;
         }
@@ -368,7 +346,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const mission = missions[idx];
         const key = storageKey ? storageKey(`mission_clicked_${mission.id}`) : `mission_clicked_${mission.id}`;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getLocalDateKey();
 
         // 日次クリック制限: 同じ日なら押せない
         try {
