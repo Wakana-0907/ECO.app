@@ -15,6 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const title = page.querySelector('.page-title');
   if (title) {
-    title.textContent = 'URL';
+    title.textContent = '分別ヒント';
   }
 });
