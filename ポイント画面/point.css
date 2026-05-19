@@ -35,6 +35,17 @@ body {
   margin-bottom: 12px;
 }
 
+.username-chip {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid rgba(16,185,129,0.18);
+  box-shadow: 0 6px 14px rgba(16,185,129,0.06);
+}
+
 .logout-link {
   display: inline-flex;
   align-items: center;
@@ -247,6 +258,31 @@ body {
   transform: scale(1.05);
 }
 
+/* feature card undo button (match mission undo style) */
+.feature-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  gap: 6px;
+}
+
+.feature-undo-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.feature-undo-btn:hover {
+  background: #fca5a5;
+  transform: scale(1.05);
+}
+
 .features-section {
   margin-top: 18px;
 }
@@ -270,21 +306,21 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  padding: 20px;
   background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 12px;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
   color: #0f172a;
   font-weight: 700;
   cursor: pointer;
+  position: relative;
 }
 
 .feature-card.clicked-today,
 .feature-card:disabled {
   opacity: 0.6;
   transform: none;
-  pointer-events: none;
 }
 
 .feature-icon {
