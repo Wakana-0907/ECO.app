@@ -60,6 +60,24 @@ function getPageElement(pageIdentifier) {
   }) || null;
 }
 
+function refreshBadgeIframe() {
+  const badgeIframe = document.querySelector('.page-badge iframe.embedded-page');
+  if (!badgeIframe) return;
+
+  const contentWindow = badgeIframe.contentWindow;
+  if (contentWindow && typeof contentWindow.updateBadgeState === 'function') {
+    contentWindow.updateBadgeState();
+  } else if (badgeIframe.src) {
+    badgeIframe.src = badgeIframe.src;
+  }
+}
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'badgeStateChange') {
+    refreshBadgeIframe();
+  }
+});
+
 function switchPage(pageName) {
   const pages = document.querySelectorAll('.page-content');
   const tabs = document.querySelectorAll('.tab-button');
@@ -78,9 +96,14 @@ function switchPage(pageName) {
   const targetPage = getPageElement(pageName);
   if (targetPage) {
     targetPage.classList.add('active');
+    if (pageName === 'badge') {
+      refreshBadgeIframe();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+
+window.addEventListener('badgeStateChange', refreshBadgeIframe);
 
 window.addEventListener('DOMContentLoaded', () => {
   const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');

@@ -58,7 +58,7 @@ body {
    タイトル
 ========================= */
 h1 {
-    color: #333;
+    color: #000;
     margin-bottom: 20px;
     margin-top: 0;
     text-align: center;
@@ -176,14 +176,14 @@ p {
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     
-    /* ↓ ここを追加 */
-    animation: slideDown 0.4s ease-out; 
+    /* アニメーションを適用し、終了時の状態を維持(forwards) */
+    animation: slideDown 0.4s ease-out forwards; 
 }
 
-/* もともとある定義を再確認（そのままでOK） */
+/* アニメーション定義 */
 @keyframes slideDown {
     from {
-        transform: translate(-50%, -50px); /* X軸の固定も忘れずに */
+        transform: translate(-50%, -50px); /* 左右中央配置を保ったまま上へずらす */
         opacity: 0;
     }
     to {
@@ -219,6 +219,7 @@ p {
     margin: 0;
     font-weight: normal;
 }
+
 /* Hide any injected/leftover global username or logout UI when this page is embedded */
 .username-chip,
 .logout-link,
