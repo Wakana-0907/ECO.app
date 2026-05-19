@@ -2,24 +2,7 @@
    全体設定
 ========================= */
 body {
-    background: linear-gradient(180deg, #eef4ff 0%, #f7f8fb 100%);
-    margin: 0;
-    padding: 24px;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #000;
-}
 
-/* =========================
-   タイトル
-========================= */
-h1 {
-    color: #000;
-    margin-bottom: 40px;
-}
 
 /* =========================
    バッジ一覧
@@ -31,7 +14,6 @@ h1 {
     gap: 16px;
     width: min(100%, 420px);
     margin: 0 auto;
-
 }
 
 .badge-screen {
@@ -80,7 +62,6 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-
     text-align: center;
 }
 
@@ -101,6 +82,7 @@ h1 {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
     transition: 0.3s;
+    pointer-events: none;
 }
 
 /* 小さい画面向けの微調整 */
@@ -172,36 +154,33 @@ p {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
+/* モーダルの中身（白枠の部分）にアニメーションを追加 */
 .modal-content {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: #ffffff;
-    margin: 10% auto;
     padding: 30px;
     border-radius: 10px;
     width: 80%;
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    animation: slideDown 0.3s ease-in-out;
+    
+    /* アニメーションを適用し、終了時の状態を維持(forwards) */
+    animation: slideDown 0.4s ease-out forwards; 
 }
 
+/* アニメーション定義 */
 @keyframes slideDown {
     from {
-        transform: translateY(-50px);
+        transform: translate(-50%, -50px); /* 左右中央配置を保ったまま上へずらす */
         opacity: 0;
     }
     to {
-        transform: translateY(0);
+        transform: translate(-50%, 0);
         opacity: 1;
     }
 }
@@ -232,4 +211,12 @@ p {
     line-height: 1.6;
     margin: 0;
     font-weight: normal;
+}
+
+/* Hide any injected/leftover global username or logout UI when this page is embedded */
+.username-chip,
+.logout-link,
+.screen-header .username-chip,
+.screen-header .logout-link {
+    display: none !important;
 }
