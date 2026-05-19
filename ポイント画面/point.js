@@ -331,18 +331,15 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       // 通常のクリック処理（既にクリック済みなら再クリックは拒否、代わりに取り消しボタンを表示）
-      btn.addEventListener('click', () => { feat/back
+      btn.addEventListener('click', () => {
         if (btn.disabled || btn.classList.contains('clicked-today')) {
-          alert('このカテゴリは今日既に受け取り済みです。');
-        if (btn.classList.contains('clicked-today')) {
           alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
-          devnata
           return;
         }
 
         statusData.points += 10;
         updateUI();
- feat/back
+
         try {
           localStorage.setItem(key, today);
         } catch (e) {
@@ -353,11 +350,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // 今日としてマークして保存
         try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
-        btn.classList.add('clicked-today');
         // 取り消しボタンを表示
         createFeatureUndo(btn, key, label);
 
-        console.log(`${label} で +10ポイント (合計: ${statusData.points})`); devnata
+        console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
       });
     });
   }
@@ -386,8 +382,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (mission.current < mission.max) {
           mission.current += 1;
- feat/back
-          
+
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
@@ -402,18 +397,15 @@ window.addEventListener('DOMContentLoaded', () => {
                 console.warn('localStorage set failed', e);
               }
             }
-          console.log(`${mission.title}: ${mission.current}/${mission.max}`);
+            console.log(`ミッション完了！ ${mission.title} を達成しました。 +20ポイント (合計: ${statusData.points})`);
+            try { if (typeof saveState === 'function') saveState(); } catch(e){}
+          } else {
+            console.log(`${mission.title}: ${mission.current}/${mission.max}`);
+          }
 
           // 日次ロックをセット
           try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
 
-          // 完了時にポイント加算
-          if (mission.current >= mission.max && !mission.completed) {
-            mission.completed = true;
-            statusData.points += 20;
-            console.log(`ミッション完了！ +20ポイント (合計: ${statusData.points})`);
-            try { if (typeof saveState === 'function') saveState(); } catch(e){} devnata
-          }
           updateUI();
         }
       });
