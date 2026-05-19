@@ -200,29 +200,6 @@ window.addEventListener('DOMContentLoaded', () => {
     console.warn('restore ECO_status failed', e);
   }
 
-  // --- 一時リセット: 今回だけカテゴリの「今日フラグ」を消して押せるようにする ---
-  try {
-    if (!sessionStorage.getItem('feature_reset_done')) {
-      const today = new Date().toISOString().slice(0, 10);
-      document.querySelectorAll('.feature-card').forEach((el) => {
-        const label = el.querySelector('.feature-label')?.textContent || '';
-        const base = `feature_clicked_${label.replace(/\s+/g, '_')}`;
-        const namespaced = storageKey ? storageKey(base) : base;
-        const legacy = base;
-        try {
-          if (localStorage.getItem(namespaced) === today) localStorage.removeItem(namespaced);
-        } catch (e) {}
-        try {
-          if (localStorage.getItem(legacy) === today) localStorage.removeItem(legacy);
-        } catch (e) {}
-        el.classList.remove('clicked-today');
-      });
-      sessionStorage.setItem('feature_reset_done', '1');
-    }
-  } catch (e) {
-    console.warn('feature reset failed', e);
-  }
-
   
 
   const levelText = document.querySelector('.level-info span:first-child');
@@ -258,6 +235,14 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const getLocalDateKey = () => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   // 3x3 の feature-card にイベントを付与
   const featureCards = document.querySelectorAll('.feature-card');
   if (featureCards && featureCards.length) {
@@ -266,9 +251,8 @@ window.addEventListener('DOMContentLoaded', () => {
       const key = storageKey ? storageKey(`feature_clicked_${label.replace(/\s+/g, '_')}`) : `feature_clicked_${label.replace(/\s+/g, '_')}`;
 
       // 初期化: 既に今日クリック済みなら見た目と disabled を設定
-      const today = new Date().toISOString().slice(0, 10);
       try {
-        if (localStorage.getItem(key) === today) {
+        if (localStorage.getItem(key) === getLocalDateKey()) {
           btn.classList.add('clicked-today');
         }
       } catch (e) {
@@ -325,6 +309,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // 通常のクリック処理（既にクリック済みなら再クリックは拒否、代わりに取り消しボタンを表示）
       btn.addEventListener('click', () => {
+        const today = getLocalDateKey();
+        try {
+          if (localStorage.getItem(key) === today) {
+            btn.classList.add('clicked-today');
+            alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
+            return;
+          }
+        } catch (e) {
+          console.warn('localStorage get failed', e);
+        }
+
         if (btn.classList.contains('clicked-today')) {
           alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
           return;
@@ -356,7 +351,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const mission = missions[idx];
         const key = storageKey ? storageKey(`mission_clicked_${mission.id}`) : `mission_clicked_${mission.id}`;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getLocalDateKey();
 
         // 日次クリック制限: 同じ日なら押せない
         try {
