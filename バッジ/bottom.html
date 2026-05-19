@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    <h1 style="color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">バッジ一覧</h1>
+    <h1 style="color: rgb(0, 0, 0); text-shadow: 0 2px 4px rgba(0,0,0,0.2);">バッジ一覧</h1>
 
 <div class="badge-list">
     <div class="badge-item" data-name="感謝バッジ" data-description="アプリ入れてくれてありがとう！！">
@@ -23,9 +23,11 @@
     <div class="badge-item" data-name="初ミッション達成" data-description="マイボトル持参">
         <img src="はじまり.png" class="badge-img">
     </div>
-    <div class="badge-item" data-name="初ミッション達成" data-description="ラベル・キャップを剥がす">
+    
+    <div class="badge-item" id="badge-label" data-name="初ミッション達成" data-description="ラベル・キャップを剥がす">
         <img src="はじまり.png" class="badge-img">
     </div>
+    
     <div class="badge-item" data-name="プラスチック" data-description="マイバックを使う">
         <img src="はじまり.png" class="badge-img">
     </div>
@@ -61,7 +63,6 @@
     </div>
 </div>
 
-<!-- バッジ詳細モーダル -->
 <div id="badge-modal" class="modal">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
