@@ -2,34 +2,57 @@
    全体設定
 ========================= */
 body {
-    background-color: #ADE0EE;
-    margin: 0;
-    padding: 20px 20px;
 
-   
-    align-items: center;
-    font-family: sans-serif;
-}
-
-/* =========================
-   タイトル
-========================= */
-h1 {
-    color: #333;
-    margin-bottom: 40px;
-}
 
 /* =========================
    バッジ一覧
 ========================= */
 .badge-list {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     justify-items: center;
-    gap: 20px;
-    max-width: 600px;
+    gap: 16px;
+    width: min(100%, 420px);
     margin: 0 auto;
+}
 
+.badge-screen {
+    width: min(100%, 420px);
+    margin: 0 auto;
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-screen h1 {
+    margin: 0;
+    align-self: flex-start;
+    width: 100%;
+    font-size: clamp(1.05rem, 4.6vw, 1.25rem);
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    color: #000;
+}
+
+/* 色付きの帯: コンテンツ幅に収まり、バッジ群を包む */
+.badge-band {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 22px 20px; /* バッジを一回り大きく囲む余白 */
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    display: flex;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, 0.04);
+}
+
+.badge-band .badge-list {
+    width: 100%;
+    margin: 0;
+    padding: 12px 0; /* 内側の余白を少し増やしてバッジ群を余裕を持たせる */
 }
 
 /* =========================
@@ -39,7 +62,6 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-
     text-align: center;
 }
 
@@ -47,19 +69,34 @@ h1 {
    バッジ画像
 ========================= */
 .badge-img {
-    width: 120px;
-    height: 120px;
-
+    width: clamp(64px, 22vw, 120px);
+    height: auto;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
 
     border-radius: 50%;
-    background-color: white;
+    background-color: transparent;
 
-    border: 4px solid #ffffff;
+    border: 4px solid rgba(255,255,255,0.45);
 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
     transition: 0.3s;
+    pointer-events: none;
+}
+
+/* 小さい画面向けの微調整 */
+@media (max-width: 420px) {
+    .badge-list {
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    .badge-img {
+        width: clamp(56px, 26vw, 100px);
+    }
+    p {
+        font-size: 0.9rem;
+    }
 }
 
 /* =========================
@@ -91,7 +128,7 @@ h1 {
 p {
     margin-top: 10px;
     font-weight: bold;
-    color: #333;
+    color: #000;
 }
 
 /* =========================
@@ -117,42 +154,39 @@ p {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
+/* モーダルの中身（白枠の部分）にアニメーションを追加 */
 .modal-content {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: #ffffff;
-    margin: 10% auto;
     padding: 30px;
     border-radius: 10px;
     width: 80%;
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    animation: slideDown 0.3s ease-in-out;
+    
+    /* アニメーションを適用し、終了時の状態を維持(forwards) */
+    animation: slideDown 0.4s ease-out forwards; 
 }
 
+/* アニメーション定義 */
 @keyframes slideDown {
     from {
-        transform: translateY(-50px);
+        transform: translate(-50%, -50px); /* 左右中央配置を保ったまま上へずらす */
         opacity: 0;
     }
     to {
-        transform: translateY(0);
+        transform: translate(-50%, 0);
         opacity: 1;
     }
 }
 
 .close-btn {
-    color: #aaa;
+    color: #000;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -166,15 +200,23 @@ p {
 }
 
 .modal-content h2 {
-    color: #333;
+    color: #000;
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 24px;
 }
 
 .modal-content p {
-    color: #666;
+    color: #000;
     line-height: 1.6;
     margin: 0;
     font-weight: normal;
+}
+
+/* Hide any injected/leftover global username or logout UI when this page is embedded */
+.username-chip,
+.logout-link,
+.screen-header .username-chip,
+.screen-header .logout-link {
+    display: none !important;
 }

@@ -1,10 +1,10 @@
 const statusData = {
-  level: 'Lv. 1,000,000',
-  count: '5/9匹',
+  level: 'Lv. 1',
+  count: '0/50', // 例: "20/50" の形式で表示（現在ポイント/次レベルまでの必要ポイント）
   points: 0, // 初期ポイント（ミッション完了時に20ずつ増加）
 };
 
-// ミッションデータ
+// ミッションデータ (id: 0 が ラベル・キャップを剥がす)
 const missions = [
   { id: 0, title: 'ラベル・キャップを剥がす', current: 0, max: 1, completed: false },
   { id: 1, title: 'ゴミを持ち帰る', current: 0, max: 5, completed: false },
@@ -52,7 +52,6 @@ function updateUI() {
   const pointsText = document.querySelector('.points');
   const levelText = document.querySelector('.level-info span:first-child');
 
-  // 計算：ポイントからレベルと次レベルへの進捗を算出
   const { level, progressPercent, pointsInLevel, req } = computeLevelFromPoints(statusData.points);
 
   if (levelText) {
@@ -66,6 +65,7 @@ function updateUI() {
     progressBar.setAttribute('aria-valuenow', String(Math.round(progressPercent)));
   }
   if (pointsText) {
+
     // 現在レベル内でのポイント表示（形式: 現在/必要）
     pointsText.textContent = `ポイント: ${pointsInLevel}/${req}`;
   }
@@ -85,28 +85,67 @@ function updateUI() {
     }
   } catch (e) {
     // ignore
+=======
+    pointsText.textContent = `ポイント: ${pointsInLevel}`;
+  }
+  updateMissionDisplay();
+  // 同期: 現在のポイント/レベルを localStorage に保存してホーム等と共有
+    try {
+    const key = (typeof storageKey === 'function') ? storageKey('ECO_status') : 'ECO_status';
+    const payload = {
+      level,
+      progressPercent,
+      points: statusData.points,
+      pointsInLevel,
+    };
+    localStorage.setItem(key, JSON.stringify(payload));
+    // ミッション進捗も保存
+    try { localStorage.setItem(key.replace('ECO_status', 'ECO_missions'), JSON.stringify(missions)); } catch(e){}
+    // 親フレームへ即時通知（iframe -> parent）
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'ECO_status_update', payload }, '*');
+      }
+    } catch (e) {
+      console.warn('postMessage failed', e);
+    }
+  } catch (e) {
+    console.warn('localStorage set failed', e);
   }
 }
 
-// ポイントから現在レベルと次レベルへの進捗(%)を計算する
+function notifyBadgeStateChanged() {
+  if (window.parent && window.parent !== window) {
+    try {
+      window.parent.dispatchEvent(new Event('badgeStateChange'));
+    } catch (e) {
+      console.warn('badgeStateChange イベントの送信に失敗しました', e);
+      try {
+        window.parent.postMessage({ type: 'badgeStateChange' }, '*');
+      } catch (err) {
+        console.warn('postMessageによる通知にも失敗しました', err);
+      }
+    }
+
+  }
+}
+
 function computeLevelFromPoints(points) {
   let level = 1;
-  let req = 50; // レベル1から次に上がるための必要ポイント
+  let req = 50; 
   let remaining = points;
 
   while (remaining >= req) {
     remaining -= req;
     level += 1;
-    req += 50; // 次のレベルは前の必要ポイントに+50
+    req += 50; 
   }
 
   const progressPercent = req > 0 ? (remaining / req) * 100 : 0;
-  // remaining は「現在のレベルで獲得しているポイント」になる
   const pointsInLevel = remaining;
   return { level, progressPercent, pointsInLevel, req };
 }
 
-// ミッション表示を更新
 function updateMissionDisplay() {
   const missionItems = document.querySelectorAll('.mission-item');
   missionItems.forEach((item, idx) => {
@@ -121,7 +160,10 @@ function updateMissionDisplay() {
         }
       }
       
+
       // 取り消しボタンの管理 — タイトル下に挿入
+=======
+
       let controls = item.querySelector('.mission-controls');
       const titleElem = item.querySelector('.mission-title');
       if (missions[idx].current > 0) {
@@ -153,7 +195,6 @@ function updateMissionDisplay() {
   });
 }
 
-// ミッション進捗を元に戻す
 function undoMission(idx) {
   if (missions[idx] && missions[idx].current > 0) {
     // 取り消しは当日に行った操作だけ許可する（今日のキーがある場合）
@@ -170,14 +211,19 @@ function undoMission(idx) {
     }
 
     missions[idx].current -= 1;
-    console.log(`${missions[idx].title}: 取り消し → ${missions[idx].current}/${missions[idx].max}`);
     
-    // 完了状態を解除
     if (missions[idx].completed) {
       missions[idx].completed = false;
       statusData.points -= 20;
-      console.log(`ミッション取り消し -20ポイント (合計: ${statusData.points})`);
+
+      // 【確実な判定】IDが0番（ラベル剥がし）ならバッジ記憶を消す
+      if (missions[idx].id === 0) {
+        localStorage.removeItem('badge_label_clear');
+        notifyBadgeStateChanged();
+        console.log('ラベル剥がしバッジを未達成に戻しました');
+      }
     }
+
     // 当日の操作フラグをクリア
     try {
       localStorage.removeItem(dailyKey);
@@ -185,6 +231,21 @@ function undoMission(idx) {
 
     // 保存
     saveMissionState(idx);
+=======
+    // 取り消したらその日のクリックロックを解除して再度押せるようにする
+      try {
+        // 現在のログインユーザーに紐づくキーと従来キーの両方を削除
+        const currentUser = (() => {
+          try { return localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'); } catch (e) { return null; }
+        })();
+        const namespaced = currentUser ? `mission_clicked_${missions[idx].id}_${currentUser}` : null;
+        const legacy = `mission_clicked_${missions[idx].id}`;
+        if (namespaced) localStorage.removeItem(namespaced);
+        localStorage.removeItem(legacy);
+      } catch (e) {
+        console.warn('localStorage remove failed', e);
+      }
+
     updateUI();
   }
 }
@@ -207,6 +268,43 @@ window.addEventListener('DOMContentLoaded', () => {
     window.UsernameDisplay.renderAll();
   }
 
+  // ストレージキー作成 helper（ユーザー毎にデータを分離）
+  const storageKey = (base) => currentUser ? `${base}_${currentUser}` : base;
+
+  // 以前のセッションがあればミッション進捗を復元
+  try {
+    const saved = localStorage.getItem(storageKey('ECO_missions')) || localStorage.getItem('ECO_missions');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // 上書き（既定の missions 構造を維持しつつ current/max/completed を復元）
+        parsed.forEach((s) => {
+          const idx = missions.findIndex(m => m.id === s.id);
+          if (idx !== -1) {
+            missions[idx].current = typeof s.current === 'number' ? s.current : missions[idx].current;
+            missions[idx].completed = !!s.completed;
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('restore missions failed', e);
+  }
+
+  // 以前のセッションがあればポイント等の状態を復元
+  try {
+    const key = storageKey ? storageKey('ECO_status') : 'ECO_status';
+    const raw = localStorage.getItem(key) || localStorage.getItem('ECO_status');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.points === 'number') {
+        statusData.points = parsed.points;
+      }
+    }
+  } catch (e) {
+    console.warn('restore ECO_status failed', e);
+  }
+
   
 
   const levelText = document.querySelector('.level-info span:first-child');
@@ -214,7 +312,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const progressBar = document.querySelector('.progress-bar');
   const progressFill = document.querySelector('.progress-fill');
 
-  // 初期 UI をポイント基準で描画
+  // 初期 UI をポイント基準で描画devnata
   updateUI();
 
   // --- 週次リセットとミッション状態の読み込み ---
@@ -241,34 +339,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ミッションボタンのクリック挙動
-  const missionBtn = document.querySelector('.mission-button');
-  if (missionBtn) {
-    const missionContent = document.querySelector('.mission-content');
-    const missionCaret = missionBtn.querySelector('.mission-caret');
-    missionBtn.addEventListener('click', () => {
-      const expanded = missionBtn.getAttribute('aria-expanded') === 'true';
-      missionBtn.setAttribute('aria-expanded', String(!expanded));
-      if (missionContent) {
-        if (expanded) {
-          missionContent.classList.remove('open');
-          // keep hidden attribute to support initial state
-          setTimeout(() => missionContent.setAttribute('hidden', ''), 300);
-        } else {
-          missionContent.removeAttribute('hidden');
-          // allow next tick for transition
-          requestAnimationFrame(() => missionContent.classList.add('open'));
-        }
-      }
-      if (missionCaret) {
-        missionCaret.style.transform = expanded ? 'rotate(0deg)' : 'rotate(180deg)';
-      }
-    });
-  }
-
-  // 3x3 の feature-card にイベントを付与
-  const featureCards = document.querySelectorAll('.feature-card');
-  if (featureCards && featureCards.length) {
-    featureCards.forEach((btn, idx) => {
       const labelElem = btn.querySelector('.feature-label');
       const rawLabel = (labelElem?.textContent || `カード ${idx + 1}`);
       const label = rawLabel.trim();
@@ -318,7 +388,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // 初期化: 既に今日クリック済みなら見た目と取り消しボタンを設定
       try {
-        if (localStorage.getItem(key) === today) {
+        if (localStorage.getItem(key) === getLocalDateKey()) {
           btn.classList.add('clicked-today');
           createUndoButton();
         }
@@ -338,11 +408,9 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         } catch (e) {}
 
-        // 10ポイント加算
         statusData.points += 10;
         updateUI();
 
-        // 今日としてマークして保存
         try {
           localStorage.setItem(key, today);
           btn.classList.add('clicked-today');
@@ -361,19 +429,22 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-        // ユーザーフィードバック
+        // 今日としてマークして保存
+        try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
+        // 取り消しボタンを表示
+        createFeatureUndo(btn, key, label);
+
         console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
       });
     });
   }
 
-  // ミッション項目クリック時に進捗を更新
+  // ミッション項目クリック時の更新処理
   const missionItems = document.querySelectorAll('.mission-item');
   missionItems.forEach((item, idx) => {
     if (missions[idx]) {
       item.style.cursor = 'pointer';
       item.addEventListener('click', (e) => {
-        // 取り消しボタンのクリックは除外
         if (e.target.closest('.mission-undo-btn')) return;
         const mission = missions[idx];
         const today = formatDate(new Date());
@@ -398,7 +469,21 @@ window.addEventListener('DOMContentLoaded', () => {
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
-            console.log(`ミッション完了！ +20ポイント (合計: ${statusData.points})`);
+
+            // 【確実な判定】IDが0番（ラベル剥がし）ならバッジ記憶を保存！
+            if (mission.id === 0) {
+              try {
+                localStorage.setItem('badge_label_clear', 'true');
+                notifyBadgeStateChanged();
+                console.log('localStorageに badge_label_clear: true を保存しました！');
+              } catch (e) {
+                console.warn('localStorage set failed', e);
+              }
+            }
+            console.log(`ミッション完了！ ${mission.title} を達成しました。 +20ポイント (合計: ${statusData.points})`);
+            try { if (typeof saveState === 'function') saveState(); } catch(e){}
+          } else {
+            console.log(`${mission.title}: ${mission.current}/${mission.max}`);
           }
           saveMissionState(idx);
           updateUI();
@@ -406,4 +491,4 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-}); 
+});

@@ -1,9 +1,14 @@
 const statusData = {
   level: 'Lv. 1',
+
   progress: 0,
   // レベル内の現在ポイント / 必要ポイント
   pointsInLevel: 0,
   pointsReq: 50,
+=======
+  progress: 55,
+  points: 0,
+
 };
 
 const dialogMessage = '木を◯本植えたのと同じ量のCO₂を削減したよ！';
@@ -30,6 +35,45 @@ function updateStatusCard() {
     progressFill.style.width = `${statusData.progress}%`;
   }
 }
+
+function syncFromStorage() {
+  try {
+    const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    const key = currentUser ? `ECO_status_${currentUser}` : 'ECO_status';
+    const raw = localStorage.getItem(key) || localStorage.getItem('ECO_status');
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.points === 'number') statusData.points = parsed.points;
+    if (typeof parsed.level !== 'undefined') statusData.level = parsed.level ? `Lv. ${parsed.level}` : statusData.level;
+    if (typeof parsed.progressPercent === 'number') statusData.progress = Math.round(parsed.progressPercent);
+    updateStatusCard();
+    return true;
+  } catch (e) {
+    console.warn('syncFromStorage failed', e);
+    return false;
+  }
+}
+
+// Listen for storage changes from other frames (e.g. ミッション iframe)
+window.addEventListener('storage', (e) => {
+  if (!e.key) return;
+  if (e.key.indexOf('ECO_status') !== -1) syncFromStorage();
+});
+
+// 受信メッセージで即時同期（iframe からの通知を想定）
+window.addEventListener('message', (e) => {
+  try {
+    const msg = e.data;
+    if (!msg || msg.type !== 'ECO_status_update') return;
+    const p = msg.payload || {};
+    if (typeof p.points === 'number') statusData.points = p.points;
+    if (typeof p.level !== 'undefined') statusData.level = p.level ? `Lv. ${p.level}` : statusData.level;
+    if (typeof p.progressPercent === 'number') statusData.progress = Math.round(p.progressPercent);
+    updateStatusCard();
+  } catch (err) {
+    console.warn('message handler failed', err);
+  }
+});
 
 function typeDialogText(text, target, interval = 35) {
   if (!target) return;
@@ -62,6 +106,24 @@ function getPageElement(pageIdentifier) {
   }) || null;
 }
 
+function refreshBadgeIframe() {
+  const badgeIframe = document.querySelector('.page-badge iframe.embedded-page');
+  if (!badgeIframe) return;
+
+  const contentWindow = badgeIframe.contentWindow;
+  if (contentWindow && typeof contentWindow.updateBadgeState === 'function') {
+    contentWindow.updateBadgeState();
+  } else if (badgeIframe.src) {
+    badgeIframe.src = badgeIframe.src;
+  }
+}
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'badgeStateChange') {
+    refreshBadgeIframe();
+  }
+});
+
 function switchPage(pageName) {
   const pages = document.querySelectorAll('.page-content');
   const tabs = document.querySelectorAll('.tab-button');
@@ -80,9 +142,14 @@ function switchPage(pageName) {
   const targetPage = getPageElement(pageName);
   if (targetPage) {
     targetPage.classList.add('active');
+    if (pageName === 'badge') {
+      refreshBadgeIframe();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+
+window.addEventListener('badgeStateChange', refreshBadgeIframe);
 
 window.addEventListener('DOMContentLoaded', () => {
   const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
@@ -128,6 +195,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const missionCaret = missionButton.querySelector('.mission-caret');
 
     missionButton.addEventListener('click', () => {
+  // 初回ロード時にストレージの状態を反映
+  syncFromStorage();
       const expanded = missionButton.getAttribute('aria-expanded') === 'true';
       missionButton.setAttribute('aria-expanded', String(!expanded));
 

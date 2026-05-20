@@ -12,9 +12,13 @@
       <div class="page-content page-home active" data-file="home.html">
         <main class="point-screen">
           <div class="screen-header">
+
             <span class="username-chip" data-username-display
                   style="display:inline-flex;align-items:center;justify-content:center;width:fit-content;padding:8px 14px;border-radius:999px;background:#ecfeff;color:#0f766e;border:1px solid rgba(45,212,191,0.22);font-size:0.95rem;font-weight:800;">
             </span>
+=======
+            <span class="username-chip" data-username-display></span>
+
             <a class="logout-link" href="../全体/ログアウト画面/logout.html">ログアウト</a>
           </div>
           <div class="cards-grid">
@@ -23,7 +27,7 @@
                 <span>Lv. 1</span>
                 <span class="points">ポイント: 0</span>
               </div>
-              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
+              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" ariavaluenow="55">
                 <div class="progress-fill" style="width: 55%;"></div>
               </div>
             </section>
@@ -67,6 +71,7 @@
       </nav>
   </div>
 
+
   <script>
   (function(){
     function loadUsers(){ try { return JSON.parse(localStorage.getItem('users') || '[]'); } catch(e){ return []; } }
@@ -75,6 +80,9 @@
     window.addEventListener('DOMContentLoaded', function(){ try { var el = document.querySelector('[data-username-display]'); if(el) el.textContent = getDisplayName(); } catch(e){} });
   })();
   </script>
+=======
+  <script src="../全体/ユーザー名/ユーザー.js"></script>
+
   <script src="home.js"></script>
 </body>
 </html>
