@@ -7,10 +7,43 @@ const statusData = {
 // ミッションデータ
 const missions = [
   { id: 0, title: 'ラベル・キャップを剥がす', current: 0, max: 1, completed: false },
-  { id: 1, title: 'ゴミを持ち帰る', current: 2, max: 5, completed: false },
+  { id: 1, title: 'ゴミを持ち帰る', current: 0, max: 5, completed: false },
   { id: 2, title: 'マイバッグを使う', current: 0, max: 1, completed: false },
-  { id: 3, title: 'マイボトル持参', current: 1, max: 3, completed: false },
+  { id: 3, title: 'マイボトル持参', current: 0, max: 3, completed: false },
 ];
+
+// ヘルパー: 日付/週開始を扱う
+function formatDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeekStart(date) {
+  // 週開始を日曜日に設定 (日曜をその週の開始とする)
+  const d = new Date(date);
+  const day = d.getDay(); // 日曜=0
+  d.setDate(d.getDate() - day);
+  return formatDate(d);
+}
+
+function saveMissionState(idx) {
+  try {
+    localStorage.setItem(`mission_current_${idx}`, String(missions[idx].current));
+    localStorage.setItem(`mission_completed_${idx}`, missions[idx].completed ? '1' : '0');
+  } catch (e) {
+    // ignore
+  }
+}
+
+function loadMissionState(idx) {
+  try {
+    const cur = localStorage.getItem(`mission_current_${idx}`);
+    const done = localStorage.getItem(`mission_completed_${idx}`);
+    if (cur !== null) missions[idx].current = Number(cur);
+    if (done !== null) missions[idx].completed = done === '1';
+  } catch (e) {
+    // ignore
+  }
+}
 
 // UI更新関数
 function updateUI() {
@@ -33,10 +66,26 @@ function updateUI() {
     progressBar.setAttribute('aria-valuenow', String(Math.round(progressPercent)));
   }
   if (pointsText) {
-    // 現在レベル内でのポイント表示（レベルアップで 0 になる）
-    pointsText.textContent = `ポイント: ${pointsInLevel}`;
+    // 現在レベル内でのポイント表示（形式: 現在/必要）
+    pointsText.textContent = `ポイント: ${pointsInLevel}/${req}`;
   }
   updateMissionDisplay();
+
+  // 親フレーム（ホーム）へ現在ステータスを送信して即時反映を促す
+  try {
+    const msg = {
+      type: 'missionStatus',
+      level: level,
+      pointsInLevel: pointsInLevel,
+      req: req,
+      progressPercent: progressPercent,
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(msg, '*');
+    }
+  } catch (e) {
+    // ignore
+  }
 }
 
 // ポイントから現在レベルと次レベルへの進捗(%)を計算する
@@ -72,17 +121,28 @@ function updateMissionDisplay() {
         }
       }
       
-      // 取り消しボタンの管理
+      // 取り消しボタンの管理 — タイトル下に挿入
       let controls = item.querySelector('.mission-controls');
+      const titleElem = item.querySelector('.mission-title');
       if (missions[idx].current > 0) {
         if (!controls) {
           controls = document.createElement('div');
           controls.className = 'mission-controls';
-          item.appendChild(controls);
+          controls.style.marginTop = '6px';
+          controls.style.fontSize = '0.9rem';
+          // タイトル要素の直後に挿入
+          if (titleElem && titleElem.parentNode) {
+            titleElem.insertAdjacentElement('afterend', controls);
+          } else {
+            item.appendChild(controls);
+          }
         }
-        controls.innerHTML = `<button class="mission-undo-btn" type="button"> 取り消す</button>`;
+        controls.innerHTML = `<button class="mission-undo-btn" type="button">取り消す</button>`;
         const undoBtn = controls.querySelector('.mission-undo-btn');
-        undoBtn.addEventListener('click', (e) => {
+        // イベントの多重登録を防ぐため既存 handler を取り除き再登録
+        undoBtn.replaceWith(undoBtn.cloneNode(true));
+        const newBtn = item.querySelector('.mission-undo-btn');
+        newBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           undoMission(idx);
         });
@@ -96,6 +156,19 @@ function updateMissionDisplay() {
 // ミッション進捗を元に戻す
 function undoMission(idx) {
   if (missions[idx] && missions[idx].current > 0) {
+    // 取り消しは当日に行った操作だけ許可する（今日のキーがある場合）
+    const today = formatDate(new Date());
+    const dailyKey = `mission_taken_${idx}`;
+    try {
+      const taken = localStorage.getItem(dailyKey);
+      if (taken && taken !== today) {
+        alert('本日の操作ではありません。取り消せません。');
+        return;
+      }
+    } catch (e) {
+      // localStorage が使えない場合は取り消しを許可
+    }
+
     missions[idx].current -= 1;
     console.log(`${missions[idx].title}: 取り消し → ${missions[idx].current}/${missions[idx].max}`);
     
@@ -105,6 +178,13 @@ function undoMission(idx) {
       statusData.points -= 20;
       console.log(`ミッション取り消し -20ポイント (合計: ${statusData.points})`);
     }
+    // 当日の操作フラグをクリア
+    try {
+      localStorage.removeItem(dailyKey);
+    } catch (e) {}
+
+    // 保存
+    saveMissionState(idx);
     updateUI();
   }
 }
@@ -137,6 +217,29 @@ window.addEventListener('DOMContentLoaded', () => {
   // 初期 UI をポイント基準で描画
   updateUI();
 
+  // --- 週次リセットとミッション状態の読み込み ---
+  try {
+    const storedWeek = localStorage.getItem('missions_week_start');
+    const thisWeek = getWeekStart(new Date());
+    if (storedWeek !== thisWeek) {
+      // 新しい週なので各ミッションのカウントをリセット
+      missions.forEach((m, idx) => {
+        m.current = 0;
+        m.completed = false;
+        saveMissionState(idx);
+        try {
+          localStorage.removeItem(`mission_taken_${idx}`);
+        } catch (e) {}
+      });
+      localStorage.setItem('missions_week_start', thisWeek);
+    } else {
+      // 同じ週なら保存された状態を読み込む
+      missions.forEach((m, idx) => loadMissionState(idx));
+    }
+  } catch (e) {
+    console.warn('mission weekly init failed', e);
+  }
+
   // ミッションボタンのクリック挙動
   const missionBtn = document.querySelector('.mission-button');
   if (missionBtn) {
@@ -166,27 +269,74 @@ window.addEventListener('DOMContentLoaded', () => {
   const featureCards = document.querySelectorAll('.feature-card');
   if (featureCards && featureCards.length) {
     featureCards.forEach((btn, idx) => {
-      const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
+      const labelElem = btn.querySelector('.feature-label');
+      const rawLabel = (labelElem?.textContent || `カード ${idx + 1}`);
+      const label = rawLabel.trim();
       const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
-
-      // 初期化: 既に今日クリック済みなら見た目と disabled を設定
       const today = new Date().toISOString().slice(0, 10);
+
+      // ヘルパー: feature の取り消しコントロールを作る
+      function ensureFeatureControls() {
+        let controls = btn.querySelector('.feature-controls');
+        if (!controls) {
+          controls = document.createElement('div');
+          controls.className = 'feature-controls';
+          controls.style.marginTop = '6px';
+          controls.style.width = '100%';
+          controls.style.display = 'flex';
+          controls.style.justifyContent = 'center';
+          if (labelElem && labelElem.parentNode) {
+            labelElem.insertAdjacentElement('afterend', controls);
+          } else {
+            btn.appendChild(controls);
+          }
+        }
+        return controls;
+      }
+
+      function createUndoButton() {
+        const controls = ensureFeatureControls();
+        controls.innerHTML = `<button class="feature-undo-btn" type="button">取り消す</button>`;
+        const undo = controls.querySelector('.feature-undo-btn');
+        // remove/replace to avoid duplicate handlers
+        undo.replaceWith(undo.cloneNode(true));
+        const newUndo = controls.querySelector('.feature-undo-btn');
+        newUndo.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // 取り消し: 再度クリックできるようにする
+          try { localStorage.removeItem(key); } catch (err) {}
+          btn.classList.remove('clicked-today');
+          // ポイントを差し引く（カテゴリは +10 のため -10）
+          statusData.points = Math.max(0, statusData.points - 10);
+          console.log(`${label} の取り消しを実行 -10ポイント (合計: ${statusData.points})`);
+          // 削除してUIを整える
+          const c = btn.querySelector('.feature-controls');
+          if (c) c.remove();
+          updateUI();
+        });
+      }
+
+      // 初期化: 既に今日クリック済みなら見た目と取り消しボタンを設定
       try {
         if (localStorage.getItem(key) === today) {
           btn.classList.add('clicked-today');
-          btn.disabled = true;
+          createUndoButton();
         }
       } catch (e) {
-        // localStorage が使えない環境ではフォールバックして何もしない
         console.warn('localStorage unavailable', e);
       }
 
+      // カード本体のクリック (div role=button) ハンドラ
       btn.addEventListener('click', () => {
-        // 押下済み/disabledなら処理しない
-        if (btn.disabled || btn.classList.contains('clicked-today')) {
-          alert('このカテゴリは今日既に受け取り済みです。');
-          return;
-        }
+        // 既に今日クリック済みなら localStorage を直接確認して処理しない
+        try {
+          if (localStorage.getItem(key) === today) {
+            alert('このカテゴリは今日既に受け取り済みです。');
+            // ensure visual state
+            btn.classList.add('clicked-today');
+            return;
+          }
+        } catch (e) {}
 
         // 10ポイント加算
         statusData.points += 10;
@@ -195,11 +345,21 @@ window.addEventListener('DOMContentLoaded', () => {
         // 今日としてマークして保存
         try {
           localStorage.setItem(key, today);
+          btn.classList.add('clicked-today');
         } catch (e) {
           console.warn('localStorage set failed', e);
         }
-        btn.classList.add('clicked-today');
-        btn.disabled = true;
+
+        // 取り消しボタンを追加
+        createUndoButton();
+
+      // キーボードで操作できるように Enter/Space を有効化
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+        }
+      });
 
         // ユーザーフィードバック
         console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
@@ -215,18 +375,32 @@ window.addEventListener('DOMContentLoaded', () => {
       item.addEventListener('click', (e) => {
         // 取り消しボタンのクリックは除外
         if (e.target.closest('.mission-undo-btn')) return;
-        
         const mission = missions[idx];
+        const today = formatDate(new Date());
+        const dailyKey = `mission_taken_${idx}`;
+
+        // 1日1回の上限チェック
+        try {
+          if (localStorage.getItem(dailyKey) === today) {
+            alert('このミッションは今日既に実行済みです（1日1回まで）。');
+            return;
+          }
+        } catch (e) {
+          // localStorage が無ければフォールバックして続行
+        }
+
         if (mission.current < mission.max) {
           mission.current += 1;
           console.log(`${mission.title}: ${mission.current}/${mission.max}`);
-          
+          try { localStorage.setItem(dailyKey, today); } catch (e) {}
+
           // 完了時にポイント加算
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
             console.log(`ミッション完了！ +20ポイント (合計: ${statusData.points})`);
           }
+          saveMissionState(idx);
           updateUI();
         }
       });
