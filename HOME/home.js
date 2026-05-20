@@ -1,7 +1,14 @@
 const statusData = {
   level: 'Lv. 1',
+
+  progress: 0,
+  // レベル内の現在ポイント / 必要ポイント
+  pointsInLevel: 0,
+  pointsReq: 50,
+=======
   progress: 55,
   points: 0,
+
 };
 
 const dialogMessage = '木を◯本植えたのと同じ量のCO₂を削減したよ！';
@@ -17,7 +24,7 @@ function updateStatusCard() {
   }
 
   if (pointsText) {
-    pointsText.textContent = `ポイント: ${statusData.points}`;
+    pointsText.textContent = `ポイント: ${statusData.pointsInLevel}/${statusData.pointsReq}`;
   }
 
   if (progressBar) {
@@ -152,6 +159,22 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   updateStatusCard();
+
+  // ミッション iframe からのステータス更新を受け取りホーム側に即時反映
+  window.addEventListener('message', (ev) => {
+    const data = ev.data || {};
+    if (data && data.type === 'missionStatus') {
+      try {
+        statusData.level = `Lv. ${data.level}`;
+        statusData.pointsInLevel = Number(data.pointsInLevel) || 0;
+        statusData.pointsReq = Number(data.req) || statusData.pointsReq;
+        statusData.progress = Number(data.progressPercent) || statusData.progress;
+        updateStatusCard();
+      } catch (e) {
+        console.warn('invalid missionStatus message', e);
+      }
+    }
+  });
 
   const dialogText = document.querySelector('.dialog-text');
   if (dialogText) {

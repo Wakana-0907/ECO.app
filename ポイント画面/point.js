@@ -12,6 +12,39 @@ const missions = [
   { id: 3, title: 'マイボトル持参', current: 0, max: 3, completed: false },
 ];
 
+// ヘルパー: 日付/週開始を扱う
+function formatDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeekStart(date) {
+  // 週開始を日曜日に設定 (日曜をその週の開始とする)
+  const d = new Date(date);
+  const day = d.getDay(); // 日曜=0
+  d.setDate(d.getDate() - day);
+  return formatDate(d);
+}
+
+function saveMissionState(idx) {
+  try {
+    localStorage.setItem(`mission_current_${idx}`, String(missions[idx].current));
+    localStorage.setItem(`mission_completed_${idx}`, missions[idx].completed ? '1' : '0');
+  } catch (e) {
+    // ignore
+  }
+}
+
+function loadMissionState(idx) {
+  try {
+    const cur = localStorage.getItem(`mission_current_${idx}`);
+    const done = localStorage.getItem(`mission_completed_${idx}`);
+    if (cur !== null) missions[idx].current = Number(cur);
+    if (done !== null) missions[idx].completed = done === '1';
+  } catch (e) {
+    // ignore
+  }
+}
+
 // UI更新関数
 function updateUI() {
   const progressFill = document.querySelector('.progress-fill');
@@ -32,6 +65,27 @@ function updateUI() {
     progressBar.setAttribute('aria-valuenow', String(Math.round(progressPercent)));
   }
   if (pointsText) {
+
+    // 現在レベル内でのポイント表示（形式: 現在/必要）
+    pointsText.textContent = `ポイント: ${pointsInLevel}/${req}`;
+  }
+  updateMissionDisplay();
+
+  // 親フレーム（ホーム）へ現在ステータスを送信して即時反映を促す
+  try {
+    const msg = {
+      type: 'missionStatus',
+      level: level,
+      pointsInLevel: pointsInLevel,
+      req: req,
+      progressPercent: progressPercent,
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(msg, '*');
+    }
+  } catch (e) {
+    // ignore
+=======
     pointsText.textContent = `ポイント: ${pointsInLevel}`;
   }
   updateMissionDisplay();
@@ -72,6 +126,7 @@ function notifyBadgeStateChanged() {
         console.warn('postMessageによる通知にも失敗しました', err);
       }
     }
+
   }
 }
 
@@ -105,16 +160,31 @@ function updateMissionDisplay() {
         }
       }
       
+
+      // 取り消しボタンの管理 — タイトル下に挿入
+=======
+
       let controls = item.querySelector('.mission-controls');
+      const titleElem = item.querySelector('.mission-title');
       if (missions[idx].current > 0) {
         if (!controls) {
           controls = document.createElement('div');
           controls.className = 'mission-controls';
-          item.appendChild(controls);
+          controls.style.marginTop = '6px';
+          controls.style.fontSize = '0.9rem';
+          // タイトル要素の直後に挿入
+          if (titleElem && titleElem.parentNode) {
+            titleElem.insertAdjacentElement('afterend', controls);
+          } else {
+            item.appendChild(controls);
+          }
         }
-        controls.innerHTML = `<button class="mission-undo-btn" type="button"> 取り消す</button>`;
+        controls.innerHTML = `<button class="mission-undo-btn" type="button">取り消す</button>`;
         const undoBtn = controls.querySelector('.mission-undo-btn');
-        undoBtn.addEventListener('click', (e) => {
+        // イベントの多重登録を防ぐため既存 handler を取り除き再登録
+        undoBtn.replaceWith(undoBtn.cloneNode(true));
+        const newBtn = item.querySelector('.mission-undo-btn');
+        newBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           undoMission(idx);
         });
@@ -127,6 +197,19 @@ function updateMissionDisplay() {
 
 function undoMission(idx) {
   if (missions[idx] && missions[idx].current > 0) {
+    // 取り消しは当日に行った操作だけ許可する（今日のキーがある場合）
+    const today = formatDate(new Date());
+    const dailyKey = `mission_taken_${idx}`;
+    try {
+      const taken = localStorage.getItem(dailyKey);
+      if (taken && taken !== today) {
+        alert('本日の操作ではありません。取り消せません。');
+        return;
+      }
+    } catch (e) {
+      // localStorage が使えない場合は取り消しを許可
+    }
+
     missions[idx].current -= 1;
     
     if (missions[idx].completed) {
@@ -140,6 +223,15 @@ function undoMission(idx) {
         console.log('ラベル剥がしバッジを未達成に戻しました');
       }
     }
+
+    // 当日の操作フラグをクリア
+    try {
+      localStorage.removeItem(dailyKey);
+    } catch (e) {}
+
+    // 保存
+    saveMissionState(idx);
+=======
     // 取り消したらその日のクリックロックを解除して再度押せるようにする
       try {
         // 現在のログインユーザーに紐づくキーと従来キーの両方を削除
@@ -153,6 +245,7 @@ function undoMission(idx) {
       } catch (e) {
         console.warn('localStorage remove failed', e);
       }
+
     updateUI();
   }
 }
@@ -222,109 +315,119 @@ window.addEventListener('DOMContentLoaded', () => {
   // 初期 UI をポイント基準で描画devnata
   updateUI();
 
-  const missionBtn = document.querySelector('.mission-button');
-  if (missionBtn) {
-    const missionContent = document.querySelector('.mission-content');
-    const missionCaret = missionBtn.querySelector('.mission-caret');
-    missionBtn.addEventListener('click', () => {
-      const expanded = missionBtn.getAttribute('aria-expanded') === 'true';
-      missionBtn.setAttribute('aria-expanded', String(!expanded));
-      if (missionContent) {
-        if (expanded) {
-          missionContent.classList.remove('open');
-          setTimeout(() => missionContent.setAttribute('hidden', ''), 300);
-        } else {
-          missionContent.removeAttribute('hidden');
-          requestAnimationFrame(() => missionContent.classList.add('open'));
-        }
-      }
-      if (missionCaret) {
-        missionCaret.style.transform = expanded ? 'rotate(0deg)' : 'rotate(180deg)';
-      }
-    });
+  // --- 週次リセットとミッション状態の読み込み ---
+  try {
+    const storedWeek = localStorage.getItem('missions_week_start');
+    const thisWeek = getWeekStart(new Date());
+    if (storedWeek !== thisWeek) {
+      // 新しい週なので各ミッションのカウントをリセット
+      missions.forEach((m, idx) => {
+        m.current = 0;
+        m.completed = false;
+        saveMissionState(idx);
+        try {
+          localStorage.removeItem(`mission_taken_${idx}`);
+        } catch (e) {}
+      });
+      localStorage.setItem('missions_week_start', thisWeek);
+    } else {
+      // 同じ週なら保存された状態を読み込む
+      missions.forEach((m, idx) => loadMissionState(idx));
+    }
+  } catch (e) {
+    console.warn('mission weekly init failed', e);
   }
 
+  // ミッションボタンのクリック挙動
+      const labelElem = btn.querySelector('.feature-label');
+      const rawLabel = (labelElem?.textContent || `カード ${idx + 1}`);
+      const label = rawLabel.trim();
+      const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
+      const today = new Date().toISOString().slice(0, 10);
 
-  const featureCards = document.querySelectorAll('.feature-card');
-  if (featureCards && featureCards.length) {
-    featureCards.forEach((btn, idx) => {
-      const label = btn.querySelector('.feature-label')?.textContent || `カード ${idx + 1}`;
-      const key = storageKey ? storageKey(`feature_clicked_${label.replace(/\s+/g, '_')}`) : `feature_clicked_${label.replace(/\s+/g, '_')}`;
+      // ヘルパー: feature の取り消しコントロールを作る
+      function ensureFeatureControls() {
+        let controls = btn.querySelector('.feature-controls');
+        if (!controls) {
+          controls = document.createElement('div');
+          controls.className = 'feature-controls';
+          controls.style.marginTop = '6px';
+          controls.style.width = '100%';
+          controls.style.display = 'flex';
+          controls.style.justifyContent = 'center';
+          if (labelElem && labelElem.parentNode) {
+            labelElem.insertAdjacentElement('afterend', controls);
+          } else {
+            btn.appendChild(controls);
+          }
+        }
+        return controls;
+      }
 
+      function createUndoButton() {
+        const controls = ensureFeatureControls();
+        controls.innerHTML = `<button class="feature-undo-btn" type="button">取り消す</button>`;
+        const undo = controls.querySelector('.feature-undo-btn');
+        // remove/replace to avoid duplicate handlers
+        undo.replaceWith(undo.cloneNode(true));
+        const newUndo = controls.querySelector('.feature-undo-btn');
+        newUndo.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // 取り消し: 再度クリックできるようにする
+          try { localStorage.removeItem(key); } catch (err) {}
+          btn.classList.remove('clicked-today');
+          // ポイントを差し引く（カテゴリは +10 のため -10）
+          statusData.points = Math.max(0, statusData.points - 10);
+          console.log(`${label} の取り消しを実行 -10ポイント (合計: ${statusData.points})`);
+          // 削除してUIを整える
+          const c = btn.querySelector('.feature-controls');
+          if (c) c.remove();
+          updateUI();
+        });
+      }
 
+      // 初期化: 既に今日クリック済みなら見た目と取り消しボタンを設定
       try {
         if (localStorage.getItem(key) === getLocalDateKey()) {
           btn.classList.add('clicked-today');
+          createUndoButton();
         }
       } catch (e) {
         console.warn('localStorage unavailable', e);
       }
 
-      // 特有の取り消しボタンを作るユーティリティ
-      const createFeatureUndo = (el, storKey, labelText) => {
-        // 既にコントロールがあれば返す
-        if (el.querySelector('.feature-controls')) return;
-        const controls = document.createElement('div');
-        controls.className = 'feature-controls';
-        const undoBtn = document.createElement('button');
-        undoBtn.type = 'button';
-        undoBtn.className = 'feature-undo-btn';
-        undoBtn.textContent = '取り消す';
-        undoBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          // ポイントを戻す
-          statusData.points = Math.max(0, statusData.points - 10);
-          // localStorage のキーを総当たりで削除
-          try {
-            const baseKey = storKey.replace(/_\d{4}-\d{2}-\d{2}$/, '');
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              const k = localStorage.key(i);
-              if (!k) continue;
-              if (k === baseKey || k.startsWith(baseKey + '_') || k.indexOf(baseKey) === 0) {
-                keysToRemove.push(k);
-              }
-            }
-            keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
-          } catch (e) { console.warn('localStorage remove failed', e); }
-          el.classList.remove('clicked-today');
-          controls.remove();
-          updateUI();
-          console.log(`${labelText} の取り消し -10ポイント (合計: ${statusData.points})`);
-        });
-        controls.appendChild(undoBtn);
-        // 見た目: ラベルの直下に配置する（可能ならラベル要素の直後）
-        const labelElForInsert = el.querySelector('.feature-label');
-        if (labelElForInsert && labelElForInsert.parentNode) {
-          labelElForInsert.insertAdjacentElement('afterend', controls);
-        } else {
-          controls.style.marginTop = '8px';
-          el.appendChild(controls);
-        }
-      };
-
-      // 初期化時に既に今日クリック済みであれば取り消しボタンを表示する
-      if (btn.classList.contains('clicked-today')) {
-        try { createFeatureUndo(btn, key, label); } catch (e) { console.warn('createFeatureUndo init failed', e); }
-      }
-
-      // 通常のクリック処理（既にクリック済みなら再クリックは拒否、代わりに取り消しボタンを表示）
+      // カード本体のクリック (div role=button) ハンドラ
       btn.addEventListener('click', () => {
-
-          alert('このカテゴリは今日既に受け取り済みです。取り消す場合は「取り消す」ボタンを押してください。');
-          return;
-        }
+        // 既に今日クリック済みなら localStorage を直接確認して処理しない
+        try {
+          if (localStorage.getItem(key) === today) {
+            alert('このカテゴリは今日既に受け取り済みです。');
+            // ensure visual state
+            btn.classList.add('clicked-today');
+            return;
+          }
+        } catch (e) {}
 
         statusData.points += 10;
         updateUI();
 
         try {
           localStorage.setItem(key, today);
+          btn.classList.add('clicked-today');
         } catch (e) {
           console.warn('localStorage set failed', e);
         }
-        btn.classList.add('clicked-today');
-        btn.disabled = true;
+
+        // 取り消しボタンを追加
+        createUndoButton();
+
+      // キーボードで操作できるように Enter/Space を有効化
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+        }
+      });
 
         // 今日としてマークして保存
         try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
@@ -343,24 +446,26 @@ window.addEventListener('DOMContentLoaded', () => {
       item.style.cursor = 'pointer';
       item.addEventListener('click', (e) => {
         if (e.target.closest('.mission-undo-btn')) return;
-
         const mission = missions[idx];
-        const key = storageKey ? storageKey(`mission_clicked_${mission.id}`) : `mission_clicked_${mission.id}`;
-        const today = getLocalDateKey();
+        const today = formatDate(new Date());
+        const dailyKey = `mission_taken_${idx}`;
 
-        // 日次クリック制限: 同じ日なら押せない
+        // 1日1回の上限チェック
         try {
-          if (localStorage.getItem(key) === today) {
-            alert('このミッションは今日既に進めました。');
+          if (localStorage.getItem(dailyKey) === today) {
+            alert('このミッションは今日既に実行済みです（1日1回まで）。');
             return;
           }
         } catch (e) {
-          console.warn('localStorage get failed', e);
+          // localStorage が無ければフォールバックして続行
         }
 
         if (mission.current < mission.max) {
           mission.current += 1;
+          console.log(`${mission.title}: ${mission.current}/${mission.max}`);
+          try { localStorage.setItem(dailyKey, today); } catch (e) {}
 
+          // 完了時にポイント加算
           if (mission.current >= mission.max && !mission.completed) {
             mission.completed = true;
             statusData.points += 20;
@@ -380,10 +485,7 @@ window.addEventListener('DOMContentLoaded', () => {
           } else {
             console.log(`${mission.title}: ${mission.current}/${mission.max}`);
           }
-
-          // 日次ロックをセット
-          try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
-
+          saveMissionState(idx);
           updateUI();
         }
       });

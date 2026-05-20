@@ -317,8 +317,7 @@ body {
   position: relative;
 }
 
-.feature-card.clicked-today,
-.feature-card:disabled {
+.feature-card.clicked-today {
   opacity: 0.6;
   transform: none;
 }
@@ -330,6 +329,29 @@ body {
 
 .feature-label {
   font-size: 0.9rem;
+}
+
+.feature-controls {
+  margin-top: 6px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.feature-undo-btn {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.feature-undo-btn:hover {
+  background: #fca5a5;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 380px) {

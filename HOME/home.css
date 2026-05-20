@@ -176,6 +176,19 @@ body {
   margin-bottom: 12px;
 }
 
+
+.logout-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+=======
 .screen-header .username-chip {
   background: #ecfdf5;
   color: #065f46;
@@ -207,6 +220,7 @@ body {
   background: #3b82f6;
   color: #ffffff;
   transform: translateY(-1px);
+
 }
 
 .mission-card {
