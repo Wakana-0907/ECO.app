@@ -5,7 +5,7 @@ const statusData = {
   // レベル内の現在ポイント / 必要ポイント
   pointsInLevel: 0,
   pointsReq: 50,
-=======
+
   progress: 55,
   points: 0,
 

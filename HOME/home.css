@@ -188,7 +188,8 @@ body {
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 700;
-=======
+}
+
 .screen-header .username-chip {
   background: #ecfdf5;
   color: #065f46;
@@ -427,7 +428,7 @@ body {
   white-space: nowrap;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 380px) {  
   body {
     padding: 16px;
   }
