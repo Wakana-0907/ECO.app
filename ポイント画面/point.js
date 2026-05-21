@@ -78,7 +78,7 @@ function updateMissionDisplay() {
     if (meta) {
       meta.textContent = `進捗: ${missions[idx].current}/${missions[idx].max}`;
 
-      if (missions[idx].current >= missions[idx].max) {
+      if (missions[idx].current > 0) {
         item.classList.add('completed');
       } else {
         item.classList.remove('completed');
@@ -213,41 +213,64 @@ function notifyBadgeStateChanged() {
 
 // ミッション取り消し
 function undoMission(idx) {
+  if (!missions[idx] || missions[idx].current <= 0) return;
 
-  if (missions[idx] && missions[idx].current > 0) {
+  const mission = missions[idx];
 
-    // 完了状態解除を先にやる
-    missions[idx].completed = false;
+  // 取り消し前に「達成済みだったか」を保存
+  const wasCompleted = mission.completed;
 
-    // 進捗を戻す
-    missions[idx].current = Math.max(
-      0,
-      missions[idx].current - 1
+  // 進捗を1減らす
+  mission.current = Math.max(0, mission.current - 1);
+
+  // max未満になったら未達成に戻す
+  if (mission.current < mission.max) {
+    mission.completed = false;
+  }
+
+  console.log(
+    `${mission.title}: 取り消し → ${mission.current}/${mission.max}`
+  );
+
+  // 今日の実行済み解除
+  try {
+    localStorage.removeItem(
+      storageKey(`mission_taken_${idx}`)
     );
+  } catch (e) {
+    console.warn('mission_taken 削除失敗', e);
+  }
 
-    console.log(
-      `${missions[idx].title}: 取り消し → ${missions[idx].current}/${missions[idx].max}`
-    );
-
-    // 今日の実行済み解除
-    try {
-      localStorage.removeItem(
-        storageKey(`mission_taken_${idx}`)
-      );
-    } catch (e) {
-      console.warn('mission_taken 削除失敗', e);
-    }
-
-    // ポイント減算
+  // 「完了状態だったもの」を崩した時だけ -20
+  if (wasCompleted && !mission.completed) {
     statusData.points = Math.max(
       0,
       statusData.points - 20
     );
-
-    saveMissionState(idx);
-
-    updateUI();
   }
+
+  // ラベル剥がしバッジ解除
+  if (mission.id === 0 && !mission.completed) {
+    try {
+      localStorage.setItem(
+        'badge_label_clear',
+        'false'
+      );
+
+      notifyBadgeStateChanged();
+
+      console.log(
+        'ラベル剥がしバッジを解除しました'
+      );
+
+    } catch (e) {
+      console.warn('badge reset failed', e);
+    }
+  }
+
+  saveMissionState(idx);
+
+  updateUI();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -502,48 +525,49 @@ if (missionBtn) {
 
       if (mission.current < mission.max) {
 
-        mission.current += 1;
+  mission.current += 1;
 
-        try {
-          localStorage.setItem(dailyKey, today);
-        } catch (e) {}
+  try {
+    localStorage.setItem(dailyKey, today);
+  } catch (e) {}
 
-        if (mission.current >= mission.max && !mission.completed) {
+  // 初回達成時のみポイント加算
+  if (
+    mission.current >= mission.max &&
+    !mission.completed
+  ) {
 
-          mission.completed = true;
+    mission.completed = true;
 
-          statusData.points += 20;
+    statusData.points += 20;
 
-          if (mission.id === 0) {
-            try {
-              localStorage.setItem('badge_label_clear', 'true');
+    if (mission.id === 0) {
+      try {
+        localStorage.setItem(
+          'badge_label_clear',
+          'true'
+        );
 
-              notifyBadgeStateChanged();
+        notifyBadgeStateChanged();
 
-              console.log(
-                'localStorageに badge_label_clear: true を保存しました！'
-              );
+        console.log(
+          'localStorageに badge_label_clear: true を保存しました！'
+        );
 
-            } catch (e) {
-              console.warn('localStorage set failed', e);
-            }
-          }
-
-          console.log(
-            `ミッション完了！ ${mission.title} を達成しました。 +20ポイント (合計: ${statusData.points})`
-          );
-
-          try {
-            if (typeof saveState === 'function') {
-              saveState();
-            }
-          } catch (e) {}
-        }
-
-        saveMissionState(idx);
-
-        updateUI();
+      } catch (e) {
+        console.warn('localStorage set failed', e);
       }
-    });
+    }
+
+    console.log(
+      `ミッション完了！ ${mission.title} を達成しました。 +20ポイント (合計: ${statusData.points})`
+    );
+  }
+
+  saveMissionState(idx);
+
+  updateUI();
+}
+    }); 
   });
 });
