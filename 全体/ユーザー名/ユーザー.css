@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, #eef4ff 0%, #f7f8fb 100%);
+  color: #1f2937;
+}
+
+.username-page {
+  width: min(100%, 420px);
+}
+
+.username-panel {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #ffffff;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+.username-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.username-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #0f766e;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.username-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+[data-username-display] {
+  min-height: 1.5em;
+}
+
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 380px) {
+  body {
+    padding: 16px;
+  }
+
+  .username-panel {
+    padding: 20px;
+  }
+}

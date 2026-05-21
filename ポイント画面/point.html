@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スマホ対応できてる？</title>
+  <link rel="stylesheet" href="../全体/ユーザー名/ユーザー.css">
+  <link rel="stylesheet" href="point.css">
+</head>
+<body>
+  <main class="point-screen">
+    <div class="screen-header">
+      <span class="username-chip" data-username-display></span>
+    </div>
+    <div class="cards-grid">
+      <section class="status-card">
+        <div class="level-info">
+          <span>Lv. 1</span>
+          <span class="points">ポイント: 0</span>
+        </div>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" ariavaluenow="55">
+          <div class="progress-fill" style="width: 55%;"></div>
+        </div>
+      </section>
+
+      <section class="mission-card">
+        <div class="mission-section">
+            <button class="mission-button" type="button" aria-label="ミッションを表示" aria-expanded="false">
+              <span class="mission-icon">😤</span>
+              <span class="mission-text">今週のミッション</span>
+              <span class="mission-caret">▾</span>
+            </button>
+        </div>
+          <div class="mission-content" >
+            <ul class="mission-list">
+              <li class="mission-item">
+                <div class="mission-title">ラベル・キャップを剥がす</div>
+                <div class="mission-meta">進捗: 0/1</div>
+              </li>
+              <li class="mission-item">
+                <div class="mission-title">ゴミを持ち帰る</div>
+                <div class="mission-meta">進捗: 0/5</div>
+              </li>
+              <li class="mission-item">
+                <div class="mission-title">マイバッグを使う</div>
+                <div class="mission-meta">進捗: 0/1</div>
+              </li>
+              <li class="mission-item">
+                <div class="mission-title">マイボトル持参</div>
+                <div class="mission-meta">進捗: 0/3</div>
+              </li>
+            </ul>
+          </div>
+      </section>
+    </div>
+    
+    <section class="features-section">
+      <h3 class="features-title">カテゴリ</h3>
+      <div class="features-grid" role="list">
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🥽</span>
+          <span class="feature-label">プラスチック</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🔥</span>
+          <span class="feature-label">可燃ごみ</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🛝</span>
+          <span class="feature-label">不燃ごみ</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🥤</span>
+          <span class="feature-label">ペットボトル</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🍾</span>
+          <span class="feature-label">ビン</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🥫</span>
+          <span class="feature-label">缶</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">🛠️</span>
+          <span class="feature-label">金属製ゴミ</span>
+        </button>
+        <button class="feature-card" type="button" role="listitem">
+          <span class="feature-icon">📃</span>
+          <span class="feature-label">紙類</span>
+        </button>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="../全体/ユーザー名/ユーザー.js"></script>
+  <script src="point.js"></script>
+</body>
+</html>
