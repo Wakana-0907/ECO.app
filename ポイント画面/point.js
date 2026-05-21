@@ -337,104 +337,95 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ミッションボタンのクリック挙動
-      const labelElem = btn.querySelector('.feature-label');
-      const rawLabel = (labelElem?.textContent || `カード ${idx + 1}`);
-      const label = rawLabel.trim();
-      const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
-      const today = new Date().toISOString().slice(0, 10);
+      // カテゴリカードのクリック処理
+    const featureCards = document.querySelectorAll('.feature-card');
 
-      // ヘルパー: feature の取り消しコントロールを作る
-      function ensureFeatureControls() {
-        let controls = btn.querySelector('.feature-controls');
-        if (!controls) {
-          controls = document.createElement('div');
-          controls.className = 'feature-controls';
-          controls.style.marginTop = '6px';
-          controls.style.width = '100%';
-          controls.style.display = 'flex';
-          controls.style.justifyContent = 'center';
-          if (labelElem && labelElem.parentNode) {
-            labelElem.insertAdjacentElement('afterend', controls);
-          } else {
-            btn.appendChild(controls);
-          }
-        }
-        return controls;
+  featureCards.forEach((btn, idx) => {
+    const labelElem = btn.querySelector('.feature-label');
+    const rawLabel = labelElem?.textContent || `カード ${idx + 1}`;
+    const label = rawLabel.trim();
+
+    const key = `feature_clicked_${label.replace(/\s+/g, '_')}`;
+    const today = new Date().toISOString().slice(0, 10);
+
+  // 取り消しボタン生成
+  function ensureFeatureControls() {
+    let controls = btn.querySelector('.feature-controls');
+
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.className = 'feature-controls';
+
+      if (labelElem && labelElem.parentNode) {
+        labelElem.insertAdjacentElement('afterend', controls);
+      } else {
+        btn.appendChild(controls);
       }
+    }
 
-      function createUndoButton() {
-        const controls = ensureFeatureControls();
-        controls.innerHTML = `<button class="feature-undo-btn" type="button">取り消す</button>`;
-        const undo = controls.querySelector('.feature-undo-btn');
-        // remove/replace to avoid duplicate handlers
-        undo.replaceWith(undo.cloneNode(true));
-        const newUndo = controls.querySelector('.feature-undo-btn');
-        newUndo.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // 取り消し: 再度クリックできるようにする
-          try { localStorage.removeItem(key); } catch (err) {}
-          btn.classList.remove('clicked-today');
-          // ポイントを差し引く（カテゴリは +10 のため -10）
-          statusData.points = Math.max(0, statusData.points - 10);
-          console.log(`${label} の取り消しを実行 -10ポイント (合計: ${statusData.points})`);
-          // 削除してUIを整える
-          const c = btn.querySelector('.feature-controls');
-          if (c) c.remove();
-          updateUI();
-        });
-      }
+    return controls;
+  }
 
-      // 初期化: 既に今日クリック済みなら見た目と取り消しボタンを設定
-      try {
-        if (localStorage.getItem(key) === getLocalDateKey()) {
-          btn.classList.add('clicked-today');
-          createUndoButton();
-        }
-      } catch (e) {
-        console.warn('localStorage unavailable', e);
-      }
+  function createUndoButton() {
+    const controls = ensureFeatureControls();
 
-      // カード本体のクリック (div role=button) ハンドラ
-      btn.addEventListener('click', () => {
-        // 既に今日クリック済みなら localStorage を直接確認して処理しない
-        try {
-          if (localStorage.getItem(key) === today) {
-            alert('このカテゴリは今日既に受け取り済みです。');
-            // ensure visual state
-            btn.classList.add('clicked-today');
-            return;
-          }
-        } catch (e) {}
+    controls.innerHTML = `
+      <button class="feature-undo-btn" type="button">
+        取り消す
+      </button>
+    `;
 
-        statusData.points += 10;
-        updateUI();
+    const undoBtn = controls.querySelector('.feature-undo-btn');
 
-        try {
-          localStorage.setItem(key, today);
-          btn.classList.add('clicked-today');
-        } catch (e) {
-          console.warn('localStorage set failed', e);
-        }
+    undoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
 
-        // 取り消しボタンを追加
-        createUndoButton();
+      localStorage.removeItem(key);
 
-      // キーボードで操作できるように Enter/Space を有効化
-      btn.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          btn.click();
-        }
-      });
+      btn.classList.remove('clicked-today');
 
-        // 今日としてマークして保存
-        try { localStorage.setItem(key, today); } catch (e) { console.warn('localStorage set failed', e); }
-        // 取り消しボタンを表示
-        createFeatureUndo(btn, key, label);
+      statusData.points = Math.max(0, statusData.points - 10);
 
-        console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
-      });
+      controls.remove();
+
+      updateUI();
     });
+  }
+
+  // 既に今日押してたら復元
+  if (localStorage.getItem(key) === today) {
+    btn.classList.add('clicked-today');
+    createUndoButton();
+  }
+
+  // カードクリック
+  btn.addEventListener('click', () => {
+    if (localStorage.getItem(key) === today) {
+      alert('今日はもう受け取り済み！');
+      return;
+    }
+
+    statusData.points += 10;
+
+    localStorage.setItem(key, today);
+
+    btn.classList.add('clicked-today');
+
+    createUndoButton();
+
+    updateUI();
+
+    console.log(`${label} で +10ポイント`);
+  });
+
+  // キーボード対応
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+});
 
   // ミッション項目クリック時の更新処理
   const missionItems = document.querySelectorAll('.mission-item');
@@ -488,3 +479,4 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+});
