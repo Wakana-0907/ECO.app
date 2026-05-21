@@ -84,8 +84,7 @@ function updateUI() {
       window.parent.postMessage(msg, '*');
     }
   } catch (e) {
-    // ignore
-=======
+
     pointsText.textContent = `ポイント: ${pointsInLevel}`;
   }
   updateMissionDisplay();
@@ -162,7 +161,6 @@ function updateMissionDisplay() {
       
 
       // 取り消しボタンの管理 — タイトル下に挿入
-=======
 
       let controls = item.querySelector('.mission-controls');
       const titleElem = item.querySelector('.mission-title');
@@ -231,7 +229,7 @@ function undoMission(idx) {
 
     // 保存
     saveMissionState(idx);
-=======
+
     // 取り消したらその日のクリックロックを解除して再度押せるようにする
       try {
         // 現在のログインユーザーに紐づくキーと従来キーの両方を削除
@@ -437,7 +435,6 @@ window.addEventListener('DOMContentLoaded', () => {
         console.log(`${label} で +10ポイント (合計: ${statusData.points})`);
       });
     });
-  }
 
   // ミッション項目クリック時の更新処理
   const missionItems = document.querySelectorAll('.mission-item');
@@ -491,4 +488,3 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-});
