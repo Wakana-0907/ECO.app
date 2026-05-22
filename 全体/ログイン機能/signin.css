@@ -1,0 +1,313 @@
+:root {
+  color-scheme: light;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, #eef4ff 0%, #f7f8fb 100%);
+}
+
+.point-screen {
+  width: min(100%, 420px);
+  padding: 16px;
+}
+
+.status-card {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  padding: 20px;
+}
+
+.cards-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.mission-card {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  padding: 20px;
+}
+
+.level-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.level-info span {
+  display: inline-block;
+}
+
+.count {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.points {
+  background: #fef3c7;
+  color: #d97706;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.18), rgba(59, 130, 246, 0.12));
+}
+
+.progress-fill {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 999px;
+  transition: width 0.45s ease;
+}
+
+.mission-section {
+  margin: 0;
+  display: flex;
+}
+
+.mission-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+.mission-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.22);
+}
+
+.mission-icon {
+  line-height: 1;
+}
+
+.mission-caret {
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.mission-content {
+  margin-top: 12px;
+  overflow: hidden;
+  transition: max-height 0.28s ease, opacity 0.2s ease;
+  max-height: 0; /* collapsed by default */
+  opacity: 0;
+}
+
+.mission-content[hidden] {
+  display: block; /* allow transitions via max-height */
+}
+
+.mission-content.open {
+  max-height: 600px; /* sufficiently large to show content */
+  opacity: 1;
+}
+
+.mission-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mission-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.mission-item.completed {
+  background: #ecfdf5;
+  border-color: rgba(16, 185, 129, 0.18);
+  opacity: 0.8;
+}
+
+.mission-title {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mission-desc {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.mission-meta {
+  font-size: 0.85rem;
+  color: #2563eb;
+  font-weight: 700;
+  align-self: flex-end;
+}
+
+.mission-controls {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.mission-undo-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.mission-undo-btn:hover {
+  background: #fca5a5;
+  transform: scale(1.05);
+}
+
+.features-section {
+  margin-top: 18px;
+}
+
+.features-title {
+  margin: 0 0 10px 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.feature-card.clicked-today,
+.feature-card:disabled {
+  opacity: 0.6;
+  transform: none;
+  pointer-events: none;
+}
+
+.feature-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.feature-label {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 380px) {
+  body {
+    padding: 16px;
+  }
+
+  .status-card {
+    padding: 16px;
+  }
+
+  .level-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .count {
+    width: fit-content;
+  }
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --- sign-in specific styles --- */
+.auth-screen{width:min(100%,420px);margin:0 auto}
+.auth-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 12px 30px rgba(2,6,23,.06);border:1px solid rgba(148,163,184,0.08)}
+.auth-title{font-size:1.25rem;margin:0 0 14px;color:#0f172a}
+.field{margin-bottom:12px}
+.field .label{display:block;font-size:0.85rem;margin-bottom:6px;color:#374151}
+.field input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);font-size:1rem}
+.form-row{display:flex;align-items:center;justify-content:space-between}
+.remember{font-size:0.9rem;color:#475569}
+.btn-primary{width:100%;padding:12px 14px;background:linear-gradient(90deg,#3b82f6,#60a5fa);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.signin-msg{margin-top:12px;font-size:0.95rem;color:#065f46}
+
+.auth-footer{margin-top:12px;text-align:center}
+.auth-footer a{color:#3b82f6;text-decoration:none;font-weight:700}

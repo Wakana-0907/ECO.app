@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECO</title>
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="content-wrapper">
+      <div class="page-content page-home active" data-file="home.html">
+        <main class="point-screen">
+          <div class="screen-header">
+
+            <span class="username-chip" data-username-display
+                  style="display:inline-flex;align-items:center;justify-content:center;width:fit-content;padding:8px 14px;border-radius:999px;background:#ecfeff;color:#0f766e;border:1px solid rgba(45,212,191,0.22);font-size:0.95rem;font-weight:800;">
+            </span>
+
+          
+
+            <a class="logout-link" href="../全体/ログアウト画面/logout.html">ログアウト</a>
+          </div>
+          <div class="cards-grid">
+            <section class="status-card">
+              <div class="level-info">
+                <span>Lv. 1</span>
+                <span class="points">ポイント: 0</span>
+              </div>
+              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" ariavaluenow="55">
+                <div class="progress-fill" style="width: 55%;"></div>
+              </div>
+            </section>
+
+          <div class="character-area">
+            <img
+              class="level-character"
+              src="レベル1.png"
+            >
+          </div>
+
+            <section class="dialog-card">
+              <p class="dialog-text"></p>
+            </section>
+          </div>
+        </main>
+      </div>
+
+      <div class="page-content page-mission" data-file="point.html">
+        <iframe class="embedded-page" src="../ポイント画面/point.html" title="ミッションページ"></iframe>
+      </div>
+
+      <div class="page-content page-badge" data-file="badge.html">
+        <iframe class="embedded-page" src="../バッジ/bottom.html" title="バッジページ"></iframe>
+      </div>
+
+      <div class="page-content page-url" data-file="url.html">
+        <iframe class="embedded-page" src="../URL/url.html" title="リンクページ"></iframe>
+      </div>
+
+      <nav class="tab-navigation" role="tablist">
+        <button class="tab-button active" data-page="home" role="tab" aria-selected="true">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">ホーム</span>
+        </button>
+        <button class="tab-button" data-page="mission" role="tab" aria-selected="false">
+          <span class="tab-icon">📃</span>
+          <span class="tab-label">ミッション</span>
+        </button>
+        <button class="tab-button" data-page="badge" role="tab" aria-selected="false">
+          <span class="tab-icon">⭐</span>
+          <span class="tab-label">バッジ</span>
+        </button>
+        <button class="tab-button" data-page="url" role="tab" aria-selected="false">
+          <span class="tab-icon">🔗</span>
+          <span class="tab-label">リンク</span>
+        </button>
+      </nav>
+  </div>
+
+
+  <script>
+  (function(){
+    function loadUsers(){ try { return JSON.parse(localStorage.getItem('users') || '[]'); } catch(e){ return []; } }
+    function getCurrentUserEmail(){ try { return localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'); } catch(e){ return null; } }
+    function getDisplayName(){ const current = getCurrentUserEmail(); if(!current) return ''; const user = loadUsers().find(u=>u.email===current); return (user && user.username) ? user.username : current; }
+    window.addEventListener('DOMContentLoaded', function(){ try { var el = document.querySelector('[data-username-display]'); if(el) el.textContent = getDisplayName(); } catch(e){} });
+  })();
+  </script>
+
+  <script src="../全体/ユーザー名/ユーザー.js"></script>
+
+  <script src="home.js"></script>
+</body>
+</html>
