@@ -268,6 +268,25 @@ function undoMission(idx) {
     }
   }
 
+  // マイバッグミッションバッジ解除
+  if (mission.id === 2 && !mission.completed) {
+    try {
+      localStorage.setItem(
+        'badge_myback_clear',
+        'false'
+      );
+
+      notifyBadgeStateChanged();
+
+      console.log(
+        'マイバックミッションバッジを解除しました'
+      );
+
+    } catch (e) {
+      console.warn('badge reset failed', e);
+    }
+  }
+
   saveMissionState(idx);
 
   updateUI();
@@ -552,6 +571,24 @@ if (missionBtn) {
 
         console.log(
           'localStorageに badge_label_clear: true を保存しました！'
+        );
+
+      } catch (e) {
+        console.warn('localStorage set failed', e);
+      }
+    }
+
+    if (mission.id === 2) {
+      try {
+        localStorage.setItem(
+          'badge_myback_clear',
+          'true'
+        );
+
+        notifyBadgeStateChanged();
+
+        console.log(
+          'localStorageに badge_myback_clear: true を保存しました！'
         );
 
       } catch (e) {
