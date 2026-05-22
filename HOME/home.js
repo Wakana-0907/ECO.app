@@ -11,7 +11,7 @@ const statusData = {
 
 };
 
-const dialogMessage = '木を◯本植えたのと同じ量のCO₂を削減したよ！';
+const dialogMessage = 'ようこそ、ECOlogへ！\nミッションをクリアして、レベルを上げよう！';
 
 function updateStatusCard() {
   const levelText = document.querySelector('.level-info span:first-child');
@@ -33,6 +33,21 @@ function updateStatusCard() {
 
   if (progressFill) {
     progressFill.style.width = `${statusData.progress}%`;
+  }
+  // キャラクター画像切り替え
+  const characterImage =
+    document.querySelector('.level-character');
+
+  if (characterImage) {
+    const levelNumber = Number(
+      String(statusData.level).replace('Lv. ', '')
+    );
+
+    if (levelNumber >= 2) {
+      characterImage.src = 'レベル2.png';
+    } else {
+      characterImage.src = 'レベル1.png';
+    }
   }
 }
 
