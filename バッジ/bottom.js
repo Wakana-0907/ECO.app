@@ -1,26 +1,59 @@
 function updateBadgeState() {
+    // 1. ラベル剥がしバッジの更新（5番目）
     const isLabelCleared = localStorage.getItem('badge_label_clear') === 'true';
     const labelBadge = document.getElementById('badge-label');
 
-    if (!labelBadge) return;
-    const badgeImg = labelBadge.querySelector('.badge-img');
+    if (labelBadge) {
+        const badgeImg = labelBadge.querySelector('.badge-img');
+        if (isLabelCleared) {
+            if (badgeImg) {
+                badgeImg.src = 'ラベル剥がし.png';
+                badgeImg.alt = 'ラベル剥がしバッジ';
+            }
+        } else {
+            if (badgeImg) {
+                badgeImg.src = 'はじまり.png';
+                badgeImg.alt = '未達成バッジ';
+            }
+        }
+    }
 
-    if (isLabelCleared) {
-        labelBadge.classList.remove('locked');
-        labelBadge.classList.add('active');
-        if (badgeImg) {
-            badgeImg.src = 'ラベル剥がし.png';
-            badgeImg.alt = 'ラベル剥がしバッジ';
+    // 2. マイバッグを使うバッジの更新（3番目）
+    const isMybackCleared = localStorage.getItem('badge_myback_clear') === 'true';
+    const mybackBadge = document.getElementById('badge-myback');
+
+    if (mybackBadge) {
+        const badgeImg = mybackBadge.querySelector('.badge-img');
+        if (isMybackCleared) {
+            if (badgeImg) {
+                badgeImg.src = 'マイバック.png';
+                badgeImg.alt = 'マイバックバッジ';
+            }
+        } else {
+            if (badgeImg) {
+                badgeImg.src = 'はじまり.png';
+                badgeImg.alt = '未達成バッジ';
+            }
         }
-        console.log('状態：達成済み。ラベル剥がしバッジを表示します。');
-    } else {
-        labelBadge.classList.remove('active');
-        labelBadge.classList.remove('locked');
-        if (badgeImg) {
-            badgeImg.src = 'はじまり.png';
-            badgeImg.alt = '未達成バッジ';
+    }
+
+    // 3. 【追加】ゴミを持ち帰るバッジの更新（2番目）
+    const isGarbageCleared = localStorage.getItem('badge_garbage_clear') === 'true';
+    const garbageBadge = document.getElementById('badge-garbage');
+
+    if (garbageBadge) {
+        const badgeImg = garbageBadge.querySelector('.badge-img');
+        if (isGarbageCleared) {
+            if (badgeImg) {
+                badgeImg.src = 'ゴミ持ち帰り.png'; // 達成したらゴミ持ち帰り.pngに変更
+                badgeImg.alt = 'ゴミ持ち帰りバッジ';
+            }
+        } else {
+            if (badgeImg) {
+                badgeImg.src = 'はじまり.png'; // 未達成・取り消し時はカラーの双葉
+                badgeImg.alt = '未達成バッジ';
+            }
         }
-        console.log('状態：未達成。初期バッジを表示します。');
     }
 }
 
@@ -42,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('focus', updateBadgeState);
     window.addEventListener('badgeStateChange', updateBadgeState);
     window.addEventListener('storage', (event) => {
-        if (event.key === 'badge_label_clear') {
+        if (event.key === 'badge_label_clear' || event.key === 'badge_myback_clear' || event.key === 'badge_garbage_clear') {
             updateBadgeState();
         }
     });
