@@ -11,7 +11,7 @@ const statusData = {
 
 };
 
-const dialogMessage = 'ようこそ、ECOlogへ！\nミッションをクリアして、レベルを上げよう！';
+const dialogMessage = 'ECOlogへようこそ！<br>ミッションをクリアして、レベルを上げよう！';
 
 function updateStatusCard() {
   const levelText = document.querySelector('.level-info span:first-child');
@@ -92,10 +92,10 @@ window.addEventListener('message', (e) => {
 
 function typeDialogText(text, target, interval = 35) {
   if (!target) return;
-  target.textContent = '';
+  target.innerHTML = '';
   let index = 0;
   const timer = setInterval(() => {
-    target.textContent += text[index] || '';
+    target.innerHTML = text.slice(0, index);
     index += 1;
     if (index > text.length) {
       clearInterval(timer);
