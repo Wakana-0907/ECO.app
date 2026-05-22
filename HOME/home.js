@@ -34,6 +34,21 @@ function updateStatusCard() {
   if (progressFill) {
     progressFill.style.width = `${statusData.progress}%`;
   }
+  // キャラクター画像切り替え
+  const characterImage =
+    document.querySelector('.level-character');
+
+  if (characterImage) {
+    const levelNumber = Number(
+      String(statusData.level).replace('Lv. ', '')
+    );
+
+    if (levelNumber >= 2) {
+      characterImage.src = 'lv2.png';
+    } else {
+      characterImage.src = 'lv1.png';
+    }
+  }
 }
 
 function syncFromStorage() {
